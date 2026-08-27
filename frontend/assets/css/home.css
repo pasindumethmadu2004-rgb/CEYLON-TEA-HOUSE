@@ -100,10 +100,11 @@ section {
             rgba(20, 45, 30, 0.55),
             rgba(20, 45, 30, 0.55)
         ),
-        url("images/tea-hero.jpg");
+        url("../images/tea_hero.png.png");
 
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
 }
 
 .hero-content {
@@ -190,16 +191,21 @@ section {
 }
 
 .category-image {
+    width: 100%;
     height: 220px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
 
     background: #e7e5dc;
-    color: #777;
-
     margin-bottom: 18px;
+}
+
+.category-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    display: block;
 }
 
 .category-card h3 {
@@ -222,23 +228,40 @@ section {
 
 .product-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 25px;
 }
 
 .product-card {
+    width: 100%;
     background: white;
+
+    overflow: hidden;
+
+    border-radius: 4px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+/* IMPORTANT FIX */
 .product-image {
+    width: 100%;
     height: 260px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
 
     background: #e1dfd5;
-    color: #777;
+}
+
+/* IMPORTANT FIX */
+.product-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    object-position: center;
+
+    display: block;
 }
 
 .product-info {
@@ -268,6 +291,7 @@ section {
     padding: 11px;
 
     border: none;
+
     background: #214d35;
     color: white;
 
@@ -295,8 +319,17 @@ section {
     font-weight: bold;
 }
 
+.outline-btn:hover {
+    background: #214d35;
+    color: white;
+}
+
 
 /* ================= REGIONS ================= */
+
+.regions {
+    background: #fffdf7;
+}
 
 .region-container {
     display: grid;
@@ -309,16 +342,23 @@ section {
 }
 
 .region-image {
+    width: 100%;
     height: 220px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
 
     background: #dcdad0;
-    color: #777;
 
     margin-bottom: 15px;
+}
+
+/* REGION IMAGES දාද්දි ඒවත් ලොකු වෙන්නේ නැති වෙන්න */
+.region-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    display: block;
 }
 
 .region-card h3 {
@@ -340,14 +380,21 @@ section {
 }
 
 .about-image {
+    width: 100%;
     height: 420px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
 
     background: #dcdad0;
-    color: #777;
+}
+
+/* ABOUT IMAGE එකටත් fix එක */
+.about-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    display: block;
 }
 
 .about-content > p:first-child {
@@ -432,8 +479,13 @@ footer {
 .footer-container a {
     display: block;
     margin-bottom: 10px;
+
     color: #ddd;
     font-size: 14px;
+}
+
+.footer-container a:hover {
+    color: #e1bd63;
 }
 
 .footer-container p {
@@ -447,7 +499,7 @@ footer {
 
     padding: 20px;
 
-    border-top: 1px solid rgba(255,255,255,0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
 
     font-size: 12px;
     color: #ccc;
@@ -517,16 +569,12 @@ footer {
     .hero h1 {
         font-size: 40px;
     }
-}
 
-.category-image {
-    height: 220px;
-    overflow: hidden;
-}
+    .product-image {
+        height: 240px;
+    }
 
-.category-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+    .category-image {
+        height: 240px;
+    }
 }
