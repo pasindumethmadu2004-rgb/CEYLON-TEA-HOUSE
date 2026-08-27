@@ -21,7 +21,7 @@
 
         <nav>
             <a href="#">Home</a>
-            <a href="#">Shop</a>
+            <a href="shop.php">Shop</a>
             <a href="#">About</a>
             <a href="#">Contact</a>
         </nav>
@@ -55,7 +55,7 @@
                 of authentic tea from Sri Lanka.
             </p>
 
-            <a href="#" class="btn">SHOP NOW</a>
+            <a href="shop.php" class="btn">SHOP NOW</a>
 
         </div>
 
@@ -122,7 +122,7 @@
             <div class="product-card">
 
                 <div class="product-image">
-                    TEA IMAGE
+                     <img src="assets/images/black-tea2.png" alt="Ceylon Black Tea">
                 </div>
 
                 <div class="product-info">
@@ -143,7 +143,7 @@
             <div class="product-card">
 
                 <div class="product-image">
-                    TEA IMAGE
+                     <img src="assets/images/green-tea2.png" alt="Ceylon Green Tea">
                 </div>
 
                 <div class="product-info">
@@ -164,7 +164,7 @@
             <div class="product-card">
 
                 <div class="product-image">
-                    TEA IMAGE
+                     <img src="assets/images/tea-bag.png" alt="Ceylon Tea Bags">
                 </div>
 
                 <div class="product-info">
@@ -185,7 +185,7 @@
             <div class="product-card">
 
                 <div class="product-image">
-                    TEA IMAGE
+                     <img src="assets/images/gift_box.png" alt="Gift Boxes">
                 </div>
 
                 <div class="product-info">
@@ -330,8 +330,8 @@
 
             <div>
                 <h3>Quick Links</h3>
-                <a href="#">Home</a>
-                <a href="#">Shop</a>
+                <a href="index.php">Home</a>
+                <a href="shop.php">Shop</a>
                 <a href="#">About Us</a>
                 <a href="#">Contact</a>
             </div>
