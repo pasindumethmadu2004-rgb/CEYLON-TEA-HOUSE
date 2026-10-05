@@ -45,11 +45,11 @@
             Shop
         </a>
 
-        <a href="#">
+        <a href="#about">
             About
         </a>
 
-        <a href="#">
+        <a href="#contact">
             Contact
         </a>
 
@@ -57,6 +57,8 @@
 
 
     <div class="header-right">
+
+        <!-- SEARCH -->
 
         <div class="search">
 
@@ -69,10 +71,47 @@
         </div>
 
 
-        <a href="#">
-            Login
-        </a>
+        <!-- ================= AUTH LINKS ================= -->
 
+        <div class="auth-links">
+
+            <!-- LOGGED OUT -->
+
+            <a
+                href="modules/auth/login.php"
+                id="loginLink"
+                class="login-link">
+
+                Login
+
+            </a>
+
+
+            <!-- LOGGED IN -->
+
+            <a
+                href="modules/account/account.php"
+                id="accountLink"
+                class="account-link">
+
+                My Account
+
+            </a>
+
+
+            <button
+                type="button"
+                id="logoutLink"
+                class="logout-link">
+
+                Logout
+
+            </button>
+
+        </div>
+
+
+        <!-- CART -->
 
         <a
             href="modules/cart/cart.php"
@@ -80,7 +119,9 @@
 
             🛒 Cart
 
-            <span id="cartCount">0</span>
+            <span id="cartCount">
+                0
+            </span>
 
         </a>
 
@@ -154,6 +195,8 @@
     <div class="category-container">
 
 
+        <!-- BLACK TEA -->
+
         <div class="category-card">
 
             <div class="category-image">
@@ -175,6 +218,8 @@
         </div>
 
 
+
+        <!-- GREEN TEA -->
 
         <div class="category-card">
 
@@ -198,6 +243,8 @@
 
 
 
+        <!-- TEA BAGS -->
+
         <div class="category-card">
 
             <div class="category-image">
@@ -219,6 +266,8 @@
         </div>
 
 
+
+        <!-- GIFT BOX -->
 
         <div class="category-card">
 
@@ -581,7 +630,9 @@
 
 <!-- ================= ABOUT ================= -->
 
-<section class="about">
+<section
+    class="about"
+    id="about">
 
     <div class="about-image">
 
@@ -712,7 +763,7 @@
 
 <!-- ================= FOOTER ================= -->
 
-<footer>
+<footer id="contact">
 
     <div class="footer-container">
 
@@ -746,11 +797,11 @@
                 Shop
             </a>
 
-            <a href="#">
+            <a href="#about">
                 About Us
             </a>
 
-            <a href="#">
+            <a href="#contact">
                 Contact
             </a>
 
@@ -812,7 +863,7 @@
 
 
 <!-- ==================================================
-     CART JAVASCRIPT
+     JAVASCRIPT
 ================================================== -->
 
 <script>
@@ -929,6 +980,162 @@ function updateCartCount() {
 
 
 
+/* ================= AUTH HEADER ================= */
+
+function updateAuthHeader() {
+
+    const isLoggedIn =
+        localStorage.getItem(
+            "isLoggedIn"
+        );
+
+
+    const currentUser =
+        localStorage.getItem(
+            "currentUser"
+        );
+
+
+    const loginLink =
+        document.getElementById(
+            "loginLink"
+        );
+
+
+    const accountLink =
+        document.getElementById(
+            "accountLink"
+        );
+
+
+    const logoutLink =
+        document.getElementById(
+            "logoutLink"
+        );
+
+
+    /*
+        USER LOGGED IN
+    */
+
+    if (
+        isLoggedIn === "true" &&
+        currentUser
+    ) {
+
+        loginLink.style.display =
+            "none";
+
+
+        accountLink.style.display =
+            "inline-block";
+
+
+        logoutLink.style.display =
+            "inline-block";
+
+    }
+
+
+    /*
+        USER NOT LOGGED IN
+    */
+
+    else {
+
+        loginLink.style.display =
+            "inline-block";
+
+
+        accountLink.style.display =
+            "none";
+
+
+        logoutLink.style.display =
+            "none";
+
+    }
+
+}
+
+
+
+/* ================= LOGOUT ================= */
+
+function logoutUser() {
+
+    const answer =
+        confirm(
+            "Are you sure you want to logout?"
+        );
+
+
+    if (!answer) {
+
+        return;
+
+    }
+
+
+    /*
+        Login status clear karanawa.
+
+        Registered user account eka
+        delete karanne naha.
+
+        Cart ekath delete karanne naha.
+    */
+
+    localStorage.removeItem(
+        "isLoggedIn"
+    );
+
+
+    localStorage.removeItem(
+        "loggedInUser"
+    );
+
+
+    localStorage.removeItem(
+        "currentUser"
+    );
+
+
+    localStorage.removeItem(
+        "redirectAfterLogin"
+    );
+
+
+    window.location.href =
+        "index.php";
+
+}
+
+
+
+/* ================= LOGOUT BUTTON ================= */
+
+const logoutLink =
+    document.getElementById(
+        "logoutLink"
+    );
+
+
+if (logoutLink) {
+
+    logoutLink.addEventListener(
+        "click",
+        function() {
+
+            logoutUser();
+
+        }
+    );
+
+}
+
+
+
 /* ================= PAGE LOAD ================= */
 
 document.addEventListener(
@@ -936,6 +1143,8 @@ document.addEventListener(
     function() {
 
         updateCartCount();
+
+        updateAuthHeader();
 
     }
 );

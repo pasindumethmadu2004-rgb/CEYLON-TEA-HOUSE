@@ -70,6 +70,9 @@ section {
     gap: 18px;
 }
 
+
+/* ================= SEARCH ================= */
+
 .search {
     border: 1px solid #ddd;
     padding: 8px 12px;
@@ -82,8 +85,117 @@ section {
     width: 120px;
 }
 
+
+/* ================= AUTH LINKS ================= */
+
+.auth-links {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+
+.login-link,
+.account-link {
+    color: #214d35;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    transition: 0.3s;
+}
+
+
+.login-link:hover,
+.account-link:hover {
+    color: #b38b35;
+}
+
+
+/*
+    Default state.
+
+    JavaScript eken logged in nam
+    My Account pennanawa.
+*/
+
+.account-link {
+    display: none;
+}
+
+
+/* ================= LOGOUT BUTTON ================= */
+
+.logout-link {
+    display: none;
+
+    padding: 7px 13px;
+
+    border: 1px solid #214d35;
+    border-radius: 20px;
+
+    background: transparent;
+
+    color: #214d35;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: 0.3s;
+}
+
+
+.logout-link:hover {
+    background: #214d35;
+    color: white;
+}
+
+
+/* ================= CART ================= */
+
 .cart {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    color: #214d35;
+
+    font-size: 14px;
     font-weight: bold;
+
+    white-space: nowrap;
+}
+
+
+.cart:hover {
+    color: #b38b35;
+}
+
+
+#cartCount {
+    min-width: 19px;
+    height: 19px;
+
+    padding: 2px 5px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #214d35;
+    color: white;
+
+    font-size: 10px;
 }
 
 
@@ -234,16 +346,18 @@ section {
 
 .product-card {
     width: 100%;
+
     background: white;
 
     overflow: hidden;
 
     border-radius: 4px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow:
+        0 2px 8px
+        rgba(0, 0, 0, 0.05);
 }
 
-/* IMPORTANT FIX */
 .product-image {
     width: 100%;
     height: 260px;
@@ -253,7 +367,6 @@ section {
     background: #e1dfd5;
 }
 
-/* IMPORTANT FIX */
 .product-image img {
     width: 100%;
     height: 100%;
@@ -313,6 +426,7 @@ section {
     padding: 13px 25px;
 
     border: 1px solid #214d35;
+
     color: #214d35;
 
     font-size: 13px;
@@ -352,7 +466,6 @@ section {
     margin-bottom: 15px;
 }
 
-/* REGION IMAGES දාද්දි ඒවත් ලොකු වෙන්නේ නැති වෙන්න */
 .region-image img {
     width: 100%;
     height: 100%;
@@ -371,7 +484,10 @@ section {
 
 .about {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr;
+
     gap: 70px;
 
     align-items: center;
@@ -388,7 +504,6 @@ section {
     background: #dcdad0;
 }
 
-/* ABOUT IMAGE එකටත් fix එක */
 .about-image img {
     width: 100%;
     height: 100%;
@@ -405,7 +520,9 @@ section {
 
 .about-content h2 {
     font-family: Georgia, serif;
+
     font-size: 40px;
+
     color: #214d35;
 
     margin: 15px 0 20px;
@@ -413,7 +530,9 @@ section {
 
 .about-content p {
     line-height: 1.8;
+
     color: #666;
+
     margin-bottom: 25px;
 }
 
@@ -426,12 +545,16 @@ section {
 
 .review-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
     gap: 25px;
 }
 
 .review-card {
     background: white;
+
     padding: 35px;
 
     text-align: center;
@@ -441,7 +564,9 @@ section {
 
 .review-card p {
     margin: 20px 0;
+
     color: #666;
+
     line-height: 1.7;
 }
 
@@ -461,26 +586,32 @@ footer {
     padding: 60px 7%;
 
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+
+    grid-template-columns:
+        2fr 1fr 1fr 1fr;
 
     gap: 50px;
 }
 
 .footer-container h2 {
     font-family: Georgia, serif;
+
     margin-bottom: 15px;
 }
 
 .footer-container h3 {
     margin-bottom: 18px;
+
     color: #e1bd63;
 }
 
 .footer-container a {
     display: block;
+
     margin-bottom: 10px;
 
     color: #ddd;
+
     font-size: 14px;
 }
 
@@ -490,7 +621,9 @@ footer {
 
 .footer-container p {
     color: #ddd;
+
     line-height: 1.8;
+
     font-size: 14px;
 }
 
@@ -499,14 +632,42 @@ footer {
 
     padding: 20px;
 
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-top:
+        1px solid
+        rgba(255, 255, 255, 0.15);
 
     font-size: 12px;
+
     color: #ccc;
 }
 
 
 /* ================= RESPONSIVE ================= */
+
+@media (max-width: 1100px) {
+
+    .header {
+        padding: 0 4%;
+    }
+
+    .header nav {
+        gap: 18px;
+    }
+
+    .header-right {
+        gap: 10px;
+    }
+
+    .auth-links {
+        gap: 8px;
+    }
+
+    .search input {
+        width: 90px;
+    }
+
+}
+
 
 @media (max-width: 900px) {
 
@@ -517,7 +678,8 @@ footer {
     .category-container,
     .product-container,
     .region-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
     .about {
@@ -529,27 +691,68 @@ footer {
     }
 
     .footer-container {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns:
+            1fr 1fr;
     }
 
     .hero h1 {
         font-size: 45px;
     }
+
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
     .header {
-        padding: 0 4%;
+        min-height: 80px;
+        height: auto;
+
+        padding: 12px 4%;
+    }
+
+    .header-right {
+        gap: 8px;
     }
 
     .header-right .search {
         display: none;
     }
 
+    .auth-links {
+        gap: 7px;
+    }
+
+    .login-link,
+    .account-link {
+        font-size: 12px;
+    }
+
+    .logout-link {
+        padding: 6px 9px;
+
+        font-size: 10px;
+    }
+
+    .cart {
+        font-size: 12px;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
     section {
         padding: 60px 5%;
+    }
+
+    .logo h2 {
+        font-size: 17px;
+    }
+
+    .logo span {
+        font-size: 9px;
     }
 
     .category-container,
@@ -577,4 +780,5 @@ footer {
     .category-image {
         height: 240px;
     }
+
 }

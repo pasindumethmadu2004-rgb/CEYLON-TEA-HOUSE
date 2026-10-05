@@ -2,321 +2,446 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
     <title>Shopping Cart | Ceylon Tea House</title>
 
-    <link rel="stylesheet" href="../../assets/css/cart.css">
+    <link
+        rel="stylesheet"
+        href="../../assets/css/cart.css">
+
 </head>
 
 <body>
 
-    <!-- ================= HEADER ================= -->
-    <header class="header">
 
-        <div class="logo">
-            <h2>Ceylon Tea House</h2>
-            <span>Authentic Ceylon Tea</span>
-        </div>
+<!-- ================= HEADER ================= -->
 
-        <nav class="nav">
-            <a href="../../index.php">Home</a>
-            <a href="../../shop.php">Shop</a>
-            <a href="#">About</a>
-            <a href="#">Contact</a>
-        </nav>
+<header class="header">
 
-        <div class="header-right">
-            <a href="../auth/login.php">Login</a>
+    <a
+        href="../../index.php"
+        class="logo">
 
-            <a href="cart.php" class="cart-link">
-                🛒 Cart
-                <span id="cartCount">0</span>
+        <h2>Ceylon Tea House</h2>
+
+        <span>Authentic Ceylon Tea</span>
+
+    </a>
+
+
+    <nav>
+
+        <a href="../../index.php">
+            Home
+        </a>
+
+        <a href="../../shop.php">
+            Shop
+        </a>
+
+        <a href="../../index.php#about">
+            About
+        </a>
+
+        <a href="../../index.php#contact">
+            Contact
+        </a>
+
+    </nav>
+
+
+    <div class="header-right">
+
+
+        <!-- AUTH LINKS -->
+
+        <div class="auth-links">
+
+            <a
+                href="../auth/login.php"
+                id="loginLink"
+                class="login-link">
+
+                Login
+
             </a>
-        </div>
-
-    </header>
 
 
-    <!-- ================= CART HERO ================= -->
-    <section class="cart-hero">
+            <a
+                href="../account/account.php"
+                id="accountLink"
+                class="account-link">
 
-        <p>YOUR SHOPPING BAG</p>
+                My Account
 
-        <h1>Shopping Cart</h1>
+            </a>
 
-        <div class="breadcrumb">
-            <a href="../../index.php">Home</a>
-            <span>/</span>
-            <span>Cart</span>
-        </div>
-
-    </section>
-
-
-    <!-- ================= CART SECTION ================= -->
-    <main class="cart-container">
-
-        <div class="cart-title">
-
-            <div>
-                <p class="small-title">CEYLON TEA HOUSE</p>
-                <h2>Your Cart</h2>
-            </div>
 
             <button
                 type="button"
-                class="clear-cart"
-                id="clearCart">
-                Clear Cart
+                id="logoutLink"
+                class="logout-link">
+
+                Logout
+
             </button>
 
         </div>
 
 
-        <!-- Cart Content -->
-        <div class="cart-layout">
+        <!-- CART -->
 
-            <!-- ================= CART ITEMS ================= -->
-            <section class="cart-items-section">
+        <a
+            href="cart.php"
+            class="cart-link">
 
-                <div class="cart-table-header">
+            🛒 Cart
 
-                    <span>PRODUCT</span>
-                    <span>PRICE</span>
-                    <span>QUANTITY</span>
-                    <span>SUBTOTAL</span>
+            <span id="cartCount">
+                0
+            </span>
 
-                </div>
+        </a>
+
+    </div>
+
+</header>
 
 
-                <!-- Products will be added using JavaScript -->
-                <div id="cartItems"></div>
+
+<!-- ================= CART HERO ================= -->
+
+<section class="cart-hero">
+
+    <p>YOUR SHOPPING BAG</p>
+
+    <h1>
+        Shopping Cart
+    </h1>
+
+    <div class="breadcrumb">
+
+        <a href="../../index.php">
+            Home
+        </a>
+
+        <span>›</span>
+
+        <span>
+            Cart
+        </span>
+
+    </div>
+
+</section>
 
 
-                <!-- Empty Cart -->
-                <div class="empty-cart" id="emptyCart">
 
-                    <div class="empty-cart-icon">
-                        🛒
-                    </div>
+<!-- ================= CART SECTION ================= -->
 
-                    <h2>Your cart is empty</h2>
+<main class="cart-section">
 
-                    <p>
-                        Looks like you haven't added any Ceylon tea yet.
+    <div class="cart-layout">
+
+
+        <!-- ================= LEFT SIDE ================= -->
+
+        <section class="cart-products">
+
+
+            <div class="cart-title">
+
+                <div>
+
+                    <p class="small-title">
+                        YOUR SELECTION
                     </p>
 
-                    <a href="../../shop.php" class="shop-now-btn">
-                        SHOP NOW
-                    </a>
+                    <h2>
+                        Shopping Cart
+                    </h2>
 
                 </div>
-
-
-                <!-- Continue Shopping -->
-                <div class="continue-shopping">
-
-                    <a href="../../shop.php">
-                        ← Continue Shopping
-                    </a>
-
-                </div>
-
-            </section>
-
-
-            <!-- ================= ORDER SUMMARY ================= -->
-            <aside class="order-summary">
-
-                <p class="summary-small-title">
-                    YOUR ORDER
-                </p>
-
-                <h2>Order Summary</h2>
-
-                <div class="summary-line">
-
-                    <span>Subtotal</span>
-
-                    <strong id="cartSubtotal">
-                        Rs. 0
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-line">
-
-                    <span>Shipping</span>
-
-                    <strong id="shippingCost">
-                        Free
-                    </strong>
-
-                </div>
-
-
-                <div class="divider"></div>
-
-
-                <div class="summary-total">
-
-                    <span>Total</span>
-
-                    <strong id="cartTotal">
-                        Rs. 0
-                    </strong>
-
-                </div>
-
-
-                <p class="shipping-message">
-                    Free delivery for your Ceylon tea order.
-                </p>
 
 
                 <button
                     type="button"
-                    class="checkout-btn"
-                    id="checkoutButton">
+                    class="clear-cart"
+                    id="clearCart">
 
-                    PROCEED TO CHECKOUT →
+                    Clear Cart
 
                 </button>
 
+            </div>
 
-                <div class="secure-payment">
-                    🔒 Secure Checkout
+
+
+            <!-- TABLE HEADER -->
+
+            <div class="cart-table-header">
+
+                <span>
+                    PRODUCT
+                </span>
+
+                <span>
+                    PRICE
+                </span>
+
+                <span>
+                    QUANTITY
+                </span>
+
+                <span>
+                    SUBTOTAL
+                </span>
+
+            </div>
+
+
+
+            <!-- PRODUCTS ADDED BY JAVASCRIPT -->
+
+            <div id="cartItems"></div>
+
+
+
+            <!-- EMPTY CART -->
+
+            <div
+                class="empty-cart"
+                id="emptyCart">
+
+                <div class="empty-icon">
+                    🛒
                 </div>
 
-            </aside>
-
-        </div>
-
-    </main>
-
-
-    <!-- ================= BENEFITS ================= -->
-    <section class="benefits">
-
-        <div class="benefit">
-            <div>🍃</div>
-
-            <h3>100% Ceylon Tea</h3>
-
-            <p>
-                Authentic tea from Sri Lanka
-            </p>
-        </div>
-
-
-        <div class="benefit">
-            <div>📦</div>
-
-            <h3>Safe Packaging</h3>
-
-            <p>
-                Carefully packed for freshness
-            </p>
-        </div>
-
-
-        <div class="benefit">
-            <div>🚚</div>
-
-            <h3>Fast Delivery</h3>
-
-            <p>
-                Quick and reliable delivery
-            </p>
-        </div>
-
-
-        <div class="benefit">
-            <div>🔒</div>
-
-            <h3>Secure Payment</h3>
-
-            <p>
-                Safe checkout experience
-            </p>
-        </div>
-
-    </section>
-
-
-    <!-- ================= FOOTER ================= -->
-    <footer class="footer">
-
-        <div class="footer-container">
-
-            <div class="footer-column">
-
-                <h2>Ceylon Tea House</h2>
+                <h3>
+                    Your cart is empty
+                </h3>
 
                 <p>
-                    Bringing the finest authentic Ceylon tea
-                    from Sri Lanka to tea lovers everywhere.
+                    Looks like you haven't added
+                    any tea to your cart yet.
                 </p>
+
+                <a
+                    href="../../shop.php"
+                    class="continue-button">
+
+                    CONTINUE SHOPPING
+
+                </a>
 
             </div>
 
 
-            <div class="footer-column">
+        </section>
 
-                <h3>Quick Links</h3>
 
-                <a href="../../index.php">Home</a>
-                <a href="../../shop.php">Shop</a>
-                <a href="#">About</a>
-                <a href="#">Contact</a>
+
+        <!-- ================= ORDER SUMMARY ================= -->
+
+        <aside class="cart-summary">
+
+            <p class="small-title">
+                ORDER DETAILS
+            </p>
+
+            <h2>
+                Order Summary
+            </h2>
+
+
+            <div class="summary-line">
+
+                <span>
+                    Subtotal
+                </span>
+
+                <strong id="cartSubtotal">
+                    Rs. 0
+                </strong>
+
+            </div>
+
+
+            <div class="summary-line">
+
+                <span>
+                    Shipping
+                </span>
+
+                <strong id="shippingCost">
+                    Free
+                </strong>
 
             </div>
 
 
-            <div class="footer-column">
+            <div class="summary-divider"></div>
 
-                <h3>Customer Service</h3>
 
-                <a href="#">My Account</a>
-                <a href="cart.php">Shopping Cart</a>
-                <a href="#">Shipping Information</a>
-                <a href="#">Privacy Policy</a>
+            <div class="summary-line total-line">
+
+                <span>
+                    Total
+                </span>
+
+                <strong id="cartTotal">
+                    Rs. 0
+                </strong>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="checkout-button"
+                id="checkoutButton">
+
+                PROCEED TO CHECKOUT
+
+            </button>
+
+
+            <a
+                href="../../shop.php"
+                class="continue-shopping">
+
+                ← Continue Shopping
+
+            </a>
+
+
+            <div class="secure-box">
+
+                <strong>
+                    🔒 Secure Checkout
+                </strong>
+
+                <p>
+                    Your shopping information
+                    is handled securely.
+                </p>
 
             </div>
 
+        </aside>
 
-            <div class="footer-column">
 
-                <h3>Follow Us</h3>
+    </div>
 
-                <p>
-                    Facebook
-                </p>
+</main>
 
-                <p>
-                    Instagram
-                </p>
 
-                <p>
-                    YouTube
-                </p>
 
-            </div>
+<!-- ================= FOOTER ================= -->
+
+<footer id="contact">
+
+    <div class="footer-container">
+
+
+        <div>
+
+            <h2>
+                Ceylon Tea House
+            </h2>
+
+            <p>
+                Authentic Ceylon Tea
+                <br>
+                from Sri Lanka.
+            </p>
 
         </div>
 
 
-        <div class="footer-bottom">
-            © 2026 Ceylon Tea House. All Rights Reserved.
+        <div>
+
+            <h3>
+                Quick Links
+            </h3>
+
+            <a href="../../index.php">
+                Home
+            </a>
+
+            <a href="../../shop.php">
+                Shop
+            </a>
+
+            <a href="../../index.php#about">
+                About Us
+            </a>
+
+            <a href="../../index.php#contact">
+                Contact
+            </a>
+
         </div>
 
-    </footer>
+
+        <div>
+
+            <h3>
+                Customer Service
+            </h3>
+
+            <a href="#">
+                Delivery
+            </a>
+
+            <a href="#">
+                Returns
+            </a>
+
+            <a href="#">
+                FAQ
+            </a>
+
+        </div>
 
 
-    <script src="../../assets/js/cart.js"></script>
+        <div>
+
+            <h3>
+                Follow Us
+            </h3>
+
+            <p>
+                Facebook
+            </p>
+
+            <p>
+                Instagram
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="copyright">
+
+        © 2026 Ceylon Tea House.
+        All Rights Reserved.
+
+    </div>
+
+</footer>
+
+
+<script src="../../assets/js/cart.js?v=8"></script>
+
 
 </body>
 

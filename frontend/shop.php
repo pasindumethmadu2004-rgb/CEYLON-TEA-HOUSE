@@ -75,9 +75,21 @@
 
         </div>
 
-        <a href="#">
-            Login
-        </a>
+        <div class="auth-links">
+
+            <a href="modules/auth/login.php" id="loginLink" class="login-link">
+                Login
+            </a>
+
+            <a href="modules/account/account.php" id="accountLink" class="account-link">
+                My Account
+            </a>
+
+            <button type="button" id="logoutLink" class="logout-link">
+                Logout
+            </button>
+
+        </div>
 
         <a
             href="modules/cart/cart.php"
@@ -1408,10 +1420,60 @@ function updateCartCount() {
 }
 
 
+/* ================= AUTH HEADER ================= */
+
+function updateAuthHeader() {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const currentUser = localStorage.getItem("currentUser");
+
+    const loginLink = document.getElementById("loginLink");
+    const accountLink = document.getElementById("accountLink");
+    const logoutLink = document.getElementById("logoutLink");
+
+    if (isLoggedIn === "true" && currentUser) {
+        loginLink.style.display = "none";
+        accountLink.style.display = "inline-block";
+        logoutLink.style.display = "inline-block";
+    } else {
+        loginLink.style.display = "inline-block";
+        accountLink.style.display = "none";
+        logoutLink.style.display = "none";
+    }
+}
+
+
+/* ================= LOGOUT ================= */
+
+function logoutUser() {
+    const answer = confirm("Are you sure you want to logout?");
+
+    if (!answer) {
+        return;
+    }
+
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("redirectAfterLogin");
+
+    window.location.href = "index.php";
+}
+
+
+const logoutLink = document.getElementById("logoutLink");
+
+if (logoutLink) {
+    logoutLink.addEventListener("click", function() {
+        logoutUser();
+    });
+}
+
+
+/* ================= PAGE LOAD ================= */
+
 document.addEventListener("DOMContentLoaded", function() {
-
     updateCartCount();
-
+    updateAuthHeader();
 });
 
 

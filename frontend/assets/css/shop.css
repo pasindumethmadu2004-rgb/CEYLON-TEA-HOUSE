@@ -819,3 +819,71 @@ footer {
     }
 
 }
+
+/* ================= AUTH LINKS ================= */
+
+.auth-links {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.login-link,
+.account-link {
+    color: #214d35;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: 0.3s;
+}
+
+.login-link:hover,
+.account-link:hover {
+    color: #b38b35;
+}
+
+.account-link {
+    display: none;
+}
+
+.logout-link {
+    display: none;
+    padding: 7px 13px;
+    border: 1px solid #214d35;
+    border-radius: 20px;
+    background: transparent;
+    color: #214d35;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.3s;
+}
+
+.logout-link:hover {
+    background: #214d35;
+    color: white;
+}
+
+.cart {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #214d35;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#cartCount {
+    min-width: 19px;
+    height: 19px;
+    padding: 2px 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #214d35;
+    color: white;
+    font-size: 10px;
+}
