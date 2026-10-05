@@ -1,265 +1,244 @@
-/* ================= GET CART ================= */
+document.addEventListener("DOMContentLoaded", function () {
 
-function getCheckoutCart() {
-
-    return JSON.parse(
-        localStorage.getItem(
-            "ceylonTeaCart"
-        )
-    ) || [];
-
-}
+    const cartKey = "ceylonTeaCart";
 
 
+    // =========================================
+    // GET CART
+    // =========================================
 
-/* ================= FORMAT PRICE ================= */
+    function getCheckoutCart() {
 
-function formatCheckoutPrice(price) {
+        try {
 
-    return "Rs. " +
-        Number(price).toLocaleString();
+            return JSON.parse(
+                localStorage.getItem(cartKey)
+            ) || [];
 
-}
+        } catch (error) {
 
+            return [];
 
-
-/* ================= CART COUNT ================= */
-
-function updateCheckoutCartCount() {
-
-    const cart =
-        getCheckoutCart();
-
-
-    let count = 0;
-
-
-    cart.forEach(function (item) {
-
-        count +=
-            Number(item.quantity);
-
-    });
-
-
-    const cartCount =
-        document.getElementById(
-            "cartCount"
-        );
-
-
-    if (cartCount) {
-
-        cartCount.innerText =
-            count;
+        }
 
     }
 
-}
 
+    // =========================================
+    // FORMAT PRICE
+    // =========================================
 
+    function formatPrice(value) {
 
-/* ================= DISPLAY ORDER SUMMARY ================= */
-
-function displayCheckoutItems() {
-
-    const cart =
-        getCheckoutCart();
-
-
-    const checkoutItems =
-        document.getElementById(
-            "checkoutItems"
+        return "Rs. " + Number(value).toLocaleString(
+            "en-LK",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
         );
-
-
-    const emptyCheckout =
-        document.getElementById(
-            "emptyCheckout"
-        );
-
-
-    const placeOrderButton =
-        document.getElementById(
-            "placeOrderButton"
-        );
-
-
-    checkoutItems.innerHTML = "";
-
-
-    let subtotal = 0;
-
-
-    if (cart.length === 0) {
-
-        emptyCheckout.style.display =
-            "block";
-
-        placeOrderButton.disabled =
-            true;
 
     }
 
-    else {
 
-        emptyCheckout.style.display =
-            "none";
+    // =========================================
+    // CART COUNT
+    // =========================================
 
-        placeOrderButton.disabled =
-            false;
+    function updateCheckoutCartCount() {
 
+        const cart = getCheckoutCart();
 
-        cart.forEach(function (item) {
+        const count = cart.reduce(
+            function (total, item) {
 
-            const itemTotal =
-                Number(item.price) *
-                Number(item.quantity);
+                return total + Number(item.quantity || 1);
 
-
-            subtotal += itemTotal;
-
-
-            const itemBox =
-                document.createElement(
-                    "div"
-                );
+            },
+            0
+        );
 
 
-            itemBox.className =
-                "checkout-item";
+        const cartCount =
+            document.getElementById("cartCount");
 
 
-            itemBox.innerHTML = `
+        if (cartCount) {
 
-                <div class="checkout-item-image">
+            cartCount.textContent = count;
 
-                    <img
-                        src="${item.image}"
-                        alt="${item.name}">
+        }
 
-                </div>
+    }
 
 
-                <div class="checkout-item-info">
+    // =========================================
+    // DISPLAY CART
+    // =========================================
 
-                    <h4>
-                        ${item.name}
-                    </h4>
+    function displayCheckoutItems() {
 
-                    <p>
-                        ${item.weight}
-                    </p>
+        const cart = getCheckoutCart();
 
+        const container =
+            document.getElementById("checkoutItems");
 
-                    <div class="item-bottom">
-
-                        <span>
-                            Qty: ${item.quantity}
-                        </span>
-
-                        <strong>
-                            ${formatCheckoutPrice(itemTotal)}
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            `;
+        const emptyCheckout =
+            document.getElementById("emptyCheckout");
 
 
-            checkoutItems.appendChild(
-                itemBox
+        let subtotal = 0;
+
+
+        if (!cart.length) {
+
+            container.innerHTML = "";
+
+            emptyCheckout.style.display = "block";
+
+        } else {
+
+            emptyCheckout.style.display = "none";
+
+
+            container.innerHTML = cart.map(
+                function (item) {
+
+                    const quantity =
+                        Number(item.quantity || 1);
+
+                    const price =
+                        Number(item.price || 0);
+
+                    const total =
+                        price * quantity;
+
+                    subtotal += total;
+
+
+                    return `
+                        <div class="checkout-item">
+
+                            <div class="checkout-item-image">
+
+                                <img
+                                    src="${item.image || ''}"
+                                    alt="${escapeHtml(item.name || 'Tea Product')}"
+                                    onerror="this.style.display='none';">
+
+                            </div>
+
+
+                            <div class="checkout-item-info">
+
+                                <h4>
+                                    ${escapeHtml(item.name || "Tea Product")}
+                                </h4>
+
+                                <p>
+                                    ${formatPrice(price)}
+                                </p>
+
+
+                                <div class="item-bottom">
+
+                                    <span>
+                                        Qty: ${quantity}
+                                    </span>
+
+                                    <strong>
+                                        ${formatPrice(total)}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                }
+            ).join("");
+
+        }
+
+
+        let shipping = 0;
+
+        if (subtotal > 0 && subtotal < 5000) {
+
+            shipping = 350;
+
+        }
+
+
+        const total = subtotal + shipping;
+
+
+        document.getElementById(
+            "checkoutSubtotal"
+        ).textContent = formatPrice(subtotal);
+
+
+        document.getElementById(
+            "checkoutShipping"
+        ).textContent = formatPrice(shipping);
+
+
+        document.getElementById(
+            "checkoutTotal"
+        ).textContent = formatPrice(total);
+
+
+        return total;
+
+    }
+
+
+    // =========================================
+    // ESCAPE HTML
+    // =========================================
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    // =========================================
+    // PAYMENT METHODS
+    // =========================================
+
+    function setupPaymentMethods() {
+
+        const options =
+            document.querySelectorAll(
+                ".payment-option"
             );
 
-        });
 
-    }
-
-
-    /*
-        Current temporary shipping rule:
-        Orders Rs. 5000 or more = free delivery.
-        Otherwise Rs. 350.
-    */
-
-    let shipping = 0;
-
-
-    if (subtotal > 0 && subtotal < 5000) {
-
-        shipping = 350;
-
-    }
-
-
-    const total =
-        subtotal + shipping;
-
-
-    document.getElementById(
-        "checkoutSubtotal"
-    ).innerText =
-        formatCheckoutPrice(
-            subtotal
-        );
-
-
-    document.getElementById(
-        "checkoutShipping"
-    ).innerText =
-        shipping === 0 && subtotal > 0
-            ? "FREE"
-            : formatCheckoutPrice(
-                shipping
+        const cardBox =
+            document.getElementById(
+                "cardPaymentBox"
             );
 
 
-    document.getElementById(
-        "checkoutTotal"
-    ).innerText =
-        formatCheckoutPrice(
-            total
-        );
+        options.forEach(function (option) {
 
-}
-
-
-
-/* ================= PAYMENT METHOD ================= */
-
-function setupPaymentMethods() {
-
-    const options =
-        document.querySelectorAll(
-            ".payment-option"
-        );
-
-
-    const paymentInputs =
-        document.querySelectorAll(
-            'input[name="payment"]'
-        );
-
-
-    const cardPaymentBox =
-        document.getElementById(
-            "cardPaymentBox"
-        );
-
-
-    paymentInputs.forEach(
-        function (input) {
-
-            input.addEventListener(
-                "change",
+            option.addEventListener(
+                "click",
                 function () {
 
                     options.forEach(
-                        function (option) {
+                        function (item) {
 
-                            option.classList.remove(
+                            item.classList.remove(
                                 "active-payment"
                             );
 
@@ -267,313 +246,536 @@ function setupPaymentMethods() {
                     );
 
 
-                    this.closest(
-                        ".payment-option"
-                    ).classList.add(
+                    option.classList.add(
                         "active-payment"
                     );
 
 
-                    if (
-                        this.value === "card"
-                    ) {
+                    const radio =
+                        option.querySelector(
+                            'input[name="paymentMethod"]'
+                        );
 
-                        cardPaymentBox.style.display =
-                            "block";
+
+                    if (radio) {
+
+                        radio.checked = true;
 
                     }
 
-                    else {
 
-                        cardPaymentBox.style.display =
-                            "none";
+                    if (
+                        radio &&
+                        radio.value === "card"
+                    ) {
+
+                        cardBox.style.display = "block";
+
+                    } else {
+
+                        cardBox.style.display = "none";
 
                     }
 
                 }
             );
 
-        }
-    );
+        });
 
-}
-
+    }
 
 
-/* ================= CARD NUMBER FORMAT ================= */
+    // =========================================
+    // VALIDATE CHECKOUT
+    // =========================================
 
-function setupCardFormatting() {
+    function validateCheckout() {
 
-    const cardNumber =
-        document.getElementById(
-            "cardNumber"
-        );
+        const firstName =
+            document.getElementById("firstName").value.trim();
 
+        const lastName =
+            document.getElementById("lastName").value.trim();
 
-    const expiry =
-        document.getElementById(
-            "expiry"
-        );
+        const email =
+            document.getElementById("email").value.trim();
 
+        const phone =
+            document.getElementById("phone").value.trim();
 
-    cardNumber.addEventListener(
-        "input",
-        function () {
+        const address =
+            document.getElementById("address").value.trim();
 
-            let value =
-                this.value
-                    .replace(/\D/g, "")
-                    .slice(0, 16);
+        const city =
+            document.getElementById("city").value.trim();
 
-
-            value =
-                value.replace(
-                    /(.{4})/g,
-                    "$1 "
-                ).trim();
+        const district =
+            document.getElementById("district").value.trim();
 
 
-            this.value =
-                value;
+        if (!firstName) {
+
+            alert("Please enter your first name.");
+
+            return false;
 
         }
-    );
 
 
-    expiry.addEventListener(
-        "input",
-        function () {
+        if (!lastName) {
 
-            let value =
-                this.value
-                    .replace(/\D/g, "")
-                    .slice(0, 4);
+            alert("Please enter your last name.");
+
+            return false;
+
+        }
 
 
-            if (value.length >= 3) {
+        if (!email || !email.includes("@")) {
 
-                value =
-                    value.slice(0, 2) +
-                    "/" +
-                    value.slice(2);
+            alert("Please enter a valid email address.");
+
+            return false;
+
+        }
+
+
+        if (!phone) {
+
+            alert("Please enter your phone number.");
+
+            return false;
+
+        }
+
+
+        if (!address) {
+
+            alert("Please enter your delivery address.");
+
+            return false;
+
+        }
+
+
+        if (!city) {
+
+            alert("Please enter your city.");
+
+            return false;
+
+        }
+
+
+        if (!district) {
+
+            alert("Please enter your district.");
+
+            return false;
+
+        }
+
+
+        const cart = getCheckoutCart();
+
+
+        if (!cart.length) {
+
+            alert("Your cart is empty.");
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    // =========================================
+    // CREATE ORDER ID
+    // =========================================
+
+    function createOrderId() {
+
+        return "CTH-" +
+            Date.now();
+
+    }
+
+
+    // =========================================
+    // START PAYHERE
+    // =========================================
+
+    async function startPayHerePayment() {
+
+        const total = displayCheckoutItems();
+
+
+        if (total <= 0) {
+
+            alert("Your cart is empty.");
+
+            return;
+
+        }
+
+
+        const firstName =
+            document.getElementById("firstName").value.trim();
+
+        const lastName =
+            document.getElementById("lastName").value.trim();
+
+        const email =
+            document.getElementById("email").value.trim();
+
+        const phone =
+            document.getElementById("phone").value.trim();
+
+        const address =
+            document.getElementById("address").value.trim();
+
+        const city =
+            document.getElementById("city").value.trim();
+
+        const district =
+            document.getElementById("district").value.trim();
+
+        const notes =
+            document.getElementById("notes").value.trim();
+
+
+        const orderId = createOrderId();
+
+
+        const amount =
+            Number(total).toFixed(2);
+
+
+        const cart = getCheckoutCart();
+
+
+        const itemNames = cart
+            .map(function (item) {
+
+                return item.name;
+
+            })
+            .join(", ");
+
+
+        try {
+
+            // =================================
+            // GET HASH FROM PHP
+            // =================================
+
+            const response = await fetch(
+                "../../../backend/api/payhere-hash.php",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        order_id: orderId,
+
+                        amount: amount,
+
+                        currency: "LKR"
+
+                    })
+
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to create payment."
+                );
 
             }
 
 
-            this.value =
-                value;
+            // =================================
+            // PAYHERE CALLBACK
+            // =================================
 
-        }
-    );
+            payhere.onCompleted =
+                function (completedOrderId) {
 
-}
-
-
-
-/* ================= VALIDATE CHECKOUT ================= */
-
-function validateCheckout() {
-
-    const requiredFields = [
-
-        "firstName",
-        "lastName",
-        "email",
-        "phone",
-        "address",
-        "city",
-        "district"
-
-    ];
+                    console.log(
+                        "Payment completed:",
+                        completedOrderId
+                    );
 
 
-    for (
-        let i = 0;
-        i < requiredFields.length;
-        i++
-    ) {
+                    localStorage.removeItem(
+                        cartKey
+                    );
 
-        const field =
-            document.getElementById(
-                requiredFields[i]
+
+                    showSuccess();
+
+                };
+
+
+            payhere.onDismissed =
+                function () {
+
+                    console.log(
+                        "PayHere payment dismissed."
+                    );
+
+                };
+
+
+            payhere.onError =
+                function (error) {
+
+                    console.error(
+                        "PayHere Error:",
+                        error
+                    );
+
+
+                    alert(
+                        "Payment failed. Please try again."
+                    );
+
+                };
+
+
+            // =================================
+            // PAYHERE PAYMENT OBJECT
+            // =================================
+
+            const payment = {
+
+                sandbox: true,
+
+                merchant_id:
+                    data.merchant_id,
+
+                return_url:
+                    undefined,
+
+                cancel_url:
+                    undefined,
+
+                notify_url:
+                    data.notify_url,
+
+                order_id:
+                    orderId,
+
+                items:
+                    itemNames || "Ceylon Tea House Order",
+
+                amount:
+                    amount,
+
+                currency:
+                    "LKR",
+
+                hash:
+                    data.hash,
+
+
+                first_name:
+                    firstName,
+
+                last_name:
+                    lastName,
+
+                email:
+                    email,
+
+                phone:
+                    phone,
+
+                address:
+                    address,
+
+                city:
+                    city,
+
+                country:
+                    "Sri Lanka",
+
+
+                delivery_address:
+                    address,
+
+                delivery_city:
+                    city,
+
+                delivery_country:
+                    "Sri Lanka",
+
+
+                custom_1:
+                    district,
+
+                custom_2:
+                    notes
+
+            };
+
+
+            console.log(
+                "Starting PayHere Sandbox..."
             );
 
 
-        if (
-            field.value.trim() === ""
-        ) {
+            payhere.startPayment(payment);
+
+        } catch (error) {
+
+            console.error(error);
 
             alert(
-                "Please complete all required customer and delivery details."
+                "Unable to start PayHere payment.\n\n" +
+                error.message
             );
-
-
-            field.focus();
-
-
-            return false;
 
         }
 
     }
 
 
-    const email =
-        document.getElementById(
-            "email"
-        ).value;
+    // =========================================
+    // CASH ON DELIVERY
+    // =========================================
 
+    function completeCashOrder() {
 
-    if (
-        !email.includes("@")
-    ) {
-
-        alert(
-            "Please enter a valid email address."
+        localStorage.removeItem(
+            cartKey
         );
 
-        return false;
+
+        showSuccess();
 
     }
 
 
-    const selectedPayment =
-        document.querySelector(
-            'input[name="payment"]:checked'
-        );
+    // =========================================
+    // SHOW SUCCESS
+    // =========================================
 
+    function showSuccess() {
 
-    if (
-        selectedPayment.value === "card"
-    ) {
-
-        const cardNumber =
+        const overlay =
             document.getElementById(
-                "cardNumber"
-            ).value;
+                "successOverlay"
+            );
 
 
-        const expiry =
-            document.getElementById(
-                "expiry"
-            ).value;
+        if (overlay) {
+
+            overlay.classList.add("show");
+
+        }
+
+    }
 
 
-        const cvv =
-            document.getElementById(
-                "cvv"
-            ).value;
+    // =========================================
+    // PLACE ORDER
+    // =========================================
+
+    async function placeOrder() {
+
+        if (!validateCheckout()) {
+
+            return;
+
+        }
 
 
-        if (
-            cardNumber.length < 19 ||
-            expiry.length < 5 ||
-            cvv.length < 3
-        ) {
+        const paymentMethod =
+            document.querySelector(
+                'input[name="paymentMethod"]:checked'
+            );
+
+
+        if (!paymentMethod) {
 
             alert(
-                "Please complete your card details."
+                "Please select a payment method."
             );
 
-            return false;
+            return;
+
+        }
+
+
+        const button =
+            document.getElementById(
+                "placeOrderButton"
+            );
+
+
+        button.disabled = true;
+
+
+        if (paymentMethod.value === "cash") {
+
+            completeCashOrder();
+
+            button.disabled = false;
+
+            return;
+
+        }
+
+
+        if (paymentMethod.value === "card") {
+
+            try {
+
+                await startPayHerePayment();
+
+            } catch (error) {
+
+                console.error(error);
+
+            }
+
+            button.disabled = false;
 
         }
 
     }
 
 
-    return true;
+    // =========================================
+    // CONTINUE SHOPPING
+    // =========================================
 
-}
-
-
-
-/* ================= PLACE ORDER ================= */
-
-function placeOrder() {
-
-    const cart =
-        getCheckoutCart();
-
-
-    if (
-        cart.length === 0
-    ) {
-
-        alert(
-            "Your cart is empty."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !validateCheckout()
-    ) {
-
-        return;
-
-    }
-
-
-    /*
-        Backend/MySQL ekata orders save karaddi
-        me section eka later update karamu.
-
-        Dan temporary frontend order success.
-    */
-
-
-    localStorage.removeItem(
-        "ceylonTeaCart"
-    );
-
-
-    updateCheckoutCartCount();
-
-
-    const successOverlay =
-        document.getElementById(
-            "successOverlay"
-        );
-
-
-    successOverlay.classList.add(
-        "show"
-    );
-
-}
-
-
-
-/* ================= PAGE LOAD ================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        updateCheckoutCartCount();
-
-        displayCheckoutItems();
-
-        setupPaymentMethods();
-
-        setupCardFormatting();
-
-
-        document.getElementById(
-            "placeOrderButton"
-        ).addEventListener(
-            "click",
-            placeOrder
-        );
-
-
+    const continueButton =
         document.getElementById(
             "continueShoppingButton"
-        ).addEventListener(
+        );
+
+
+    if (continueButton) {
+
+        continueButton.addEventListener(
             "click",
             function () {
 
@@ -584,4 +786,36 @@ document.addEventListener(
         );
 
     }
-);
+
+
+    // =========================================
+    // PLACE ORDER BUTTON
+    // =========================================
+
+    const placeOrderButton =
+        document.getElementById(
+            "placeOrderButton"
+        );
+
+
+    if (placeOrderButton) {
+
+        placeOrderButton.addEventListener(
+            "click",
+            placeOrder
+        );
+
+    }
+
+
+    // =========================================
+    // INITIALIZE
+    // =========================================
+
+    updateCheckoutCartCount();
+
+    displayCheckoutItems();
+
+    setupPaymentMethods();
+
+});

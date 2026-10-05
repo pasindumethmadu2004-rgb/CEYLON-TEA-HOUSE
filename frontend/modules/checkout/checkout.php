@@ -1,174 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Ceylon Tea House</title>
 
-    <title>
-        Checkout | Ceylon Tea House
-    </title>
+    <link rel="stylesheet" href="../../assets/css/checkout.css">
 
-    <link
-        rel="stylesheet"
-        href="../../assets/css/checkout.css">
-
+    <!-- PayHere -->
+    <script
+        type="text/javascript"
+        src="https://www.payhere.lk/lib/payhere-2.0.js">
+    </script>
 </head>
 
 <body>
 
-
-<!-- ================= HEADER ================= -->
-
 <header class="header">
 
-    <div class="logo">
-
-        <h2>
-            Ceylon Tea House
-        </h2>
-
-        <span>
-            Authentic Ceylon Tea
-        </span>
-
-    </div>
-
+    <a href="../../index.php" class="logo">
+        <h2>Ceylon Tea House</h2>
+        <span>AUTHENTIC CEYLON TEA</span>
+    </a>
 
     <nav>
-
-        <a href="../../index.php">
-            Home
-        </a>
-
-        <a href="../../shop.php">
-            Shop
-        </a>
-
-        <a href="#">
-            About
-        </a>
-
-        <a href="#">
-            Contact
-        </a>
-
-    </nav>
-
-
-    <div class="header-right">
+        <a href="../../index.php">Home</a>
+        <a href="../../shop.php">Shop</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
 
         <a href="../cart/cart.php" class="cart-link">
-            🛒 Cart
+            Cart
             <span id="cartCount">0</span>
         </a>
-
-    </div>
+    </nav>
 
 </header>
 
 
-
-<!-- ================= CHECKOUT HERO ================= -->
-
 <section class="checkout-hero">
 
-    <p>
-        SECURE CHECKOUT
-    </p>
+    <p>CEYLON TEA HOUSE</p>
 
-    <h1>
-        Complete Your Order
-    </h1>
+    <h1>Checkout</h1>
 
-    <span>
-        Fast, simple and secure checkout.
-    </span>
+    <span>Complete your order and enjoy authentic Ceylon Tea.</span>
 
 </section>
 
-
-
-<!-- ================= STEPS ================= -->
 
 <section class="steps">
 
-    <div class="step completed">
-
+    <div class="step active">
         <span>1</span>
-
-        <p>
-            Cart
-        </p>
-
+        <p>Information</p>
     </div>
 
-
     <div class="step-line"></div>
-
 
     <div class="step active">
-
         <span>2</span>
-
-        <p>
-            Checkout
-        </p>
-
+        <p>Delivery</p>
     </div>
-
 
     <div class="step-line"></div>
 
-
-    <div class="step">
-
+    <div class="step active">
         <span>3</span>
-
-        <p>
-            Complete
-        </p>
-
+        <p>Payment</p>
     </div>
 
 </section>
 
 
-
-<!-- ================= MAIN CHECKOUT ================= -->
-
 <main class="checkout-container">
 
-
-    <!-- ================= LEFT SIDE ================= -->
-
-    <section class="checkout-form-section">
+    <!-- LEFT -->
+    <div class="checkout-left">
 
 
-        <!-- CONTACT DETAILS -->
-
-        <div class="checkout-card">
+        <!-- CONTACT -->
+        <section class="checkout-card">
 
             <div class="card-heading">
 
-                <div class="heading-number">
-                    1
-                </div>
+                <div class="heading-number">1</div>
 
                 <div>
-
-                    <h2>
-                        Contact Information
-                    </h2>
-
-                    <p>
-                        Enter your contact details.
-                    </p>
-
+                    <h2>Contact Information</h2>
+                    <p>Enter your contact details.</p>
                 </div>
 
             </div>
@@ -176,88 +97,56 @@
 
             <div class="form-grid">
 
-
                 <div class="form-group">
-
-                    <label for="firstName">
-                        First Name
-                    </label>
-
+                    <label for="firstName">First Name</label>
                     <input
                         type="text"
                         id="firstName"
-                        placeholder="Enter first name">
-
+                        placeholder="Enter your first name">
                 </div>
 
 
                 <div class="form-group">
-
-                    <label for="lastName">
-                        Last Name
-                    </label>
-
+                    <label for="lastName">Last Name</label>
                     <input
                         type="text"
                         id="lastName"
-                        placeholder="Enter last name">
-
+                        placeholder="Enter your last name">
                 </div>
 
 
                 <div class="form-group">
-
-                    <label for="email">
-                        Email Address
-                    </label>
-
+                    <label for="email">Email Address</label>
                     <input
                         type="email"
                         id="email"
-                        placeholder="example@email.com">
-
+                        placeholder="Enter your email">
                 </div>
 
 
                 <div class="form-group">
-
-                    <label for="phone">
-                        Phone Number
-                    </label>
-
+                    <label for="phone">Phone Number</label>
                     <input
                         type="tel"
                         id="phone"
-                        placeholder="07X XXX XXXX">
-
+                        placeholder="Enter your phone number">
                 </div>
 
             </div>
 
-        </div>
+        </section>
 
 
-
-        <!-- DELIVERY DETAILS -->
-
-        <div class="checkout-card">
+        <!-- DELIVERY -->
+        <section class="checkout-card">
 
             <div class="card-heading">
 
-                <div class="heading-number">
-                    2
-                </div>
+                <div class="heading-number">2</div>
 
                 <div>
-
-                    <h2>
-                        Delivery Address
-                    </h2>
-
-                    <p>
-                        Where should we deliver your order?
-                    </p>
-
+                    <h2>Delivery Information</h2>
+                    <p>Enter your delivery address.</p>
                 </div>
 
             </div>
@@ -265,59 +154,38 @@
 
             <div class="form-grid">
 
-
                 <div class="form-group full-width">
 
-                    <label for="address">
-                        Address
-                    </label>
+                    <label for="address">Address</label>
 
-                    <input
-                        type="text"
+                    <textarea
                         id="address"
-                        placeholder="House number and street">
+                        rows="3"
+                        placeholder="Enter your delivery address"></textarea>
 
                 </div>
 
 
                 <div class="form-group">
 
-                    <label for="city">
-                        City
-                    </label>
+                    <label for="city">City</label>
 
                     <input
                         type="text"
                         id="city"
-                        placeholder="Enter city">
+                        placeholder="Enter your city">
 
                 </div>
 
 
                 <div class="form-group">
 
-                    <label for="district">
-                        District
-                    </label>
+                    <label for="district">District</label>
 
-                    <select id="district">
-
-                        <option value="">
-                            Select District
-                        </option>
-
-                        <option>Colombo</option>
-                        <option>Gampaha</option>
-                        <option>Kalutara</option>
-                        <option>Kandy</option>
-                        <option>Galle</option>
-                        <option>Matara</option>
-                        <option>Kurunegala</option>
-                        <option>Kegalle</option>
-                        <option>Ratnapura</option>
-                        <option>Other</option>
-
-                    </select>
+                    <input
+                        type="text"
+                        id="district"
+                        placeholder="Enter your district">
 
                 </div>
 
@@ -325,45 +193,32 @@
                 <div class="form-group full-width">
 
                     <label for="notes">
-                        Order Notes
-                        <span>
-                            Optional
-                        </span>
+                        Delivery Notes
+                        <span>(Optional)</span>
                     </label>
 
                     <textarea
                         id="notes"
-                        rows="4"
-                        placeholder="Special delivery instructions..."></textarea>
+                        rows="3"
+                        placeholder="Any special delivery instructions?"></textarea>
 
                 </div>
 
             </div>
 
-        </div>
+        </section>
 
 
-
-        <!-- PAYMENT METHOD -->
-
-        <div class="checkout-card">
+        <!-- PAYMENT -->
+        <section class="checkout-card">
 
             <div class="card-heading">
 
-                <div class="heading-number">
-                    3
-                </div>
+                <div class="heading-number">3</div>
 
                 <div>
-
-                    <h2>
-                        Payment Method
-                    </h2>
-
-                    <p>
-                        Choose how you would like to pay.
-                    </p>
-
+                    <h2>Payment Method</h2>
+                    <p>Select your preferred payment method.</p>
                 </div>
 
             </div>
@@ -371,24 +226,20 @@
 
             <div class="payment-options">
 
-
+                <!-- CASH -->
                 <label class="payment-option active-payment">
 
                     <input
                         type="radio"
-                        name="payment"
+                        name="paymentMethod"
                         value="cash"
                         checked>
 
-                    <div class="payment-icon">
-                        💵
-                    </div>
+                    <div class="payment-icon">💵</div>
 
                     <div>
 
-                        <h3>
-                            Cash on Delivery
-                        </h3>
+                        <h3>Cash on Delivery</h3>
 
                         <p>
                             Pay when your order arrives.
@@ -399,23 +250,19 @@
                 </label>
 
 
-
+                <!-- CARD -->
                 <label class="payment-option">
 
                     <input
                         type="radio"
-                        name="payment"
+                        name="paymentMethod"
                         value="card">
 
-                    <div class="payment-icon">
-                        💳
-                    </div>
+                    <div class="payment-icon">💳</div>
 
                     <div>
 
-                        <h3>
-                            Card Payment
-                        </h3>
+                        <h3>Card Payment</h3>
 
                         <p>
                             Visa / Mastercard
@@ -425,83 +272,61 @@
 
                 </label>
 
-
             </div>
 
 
+            <!-- PAYHERE AREA -->
             <div
                 class="card-payment-box"
                 id="cardPaymentBox">
 
+                <div>
 
-                <div class="form-group full-width">
+                    <h3 style="color:#173d2b; margin-bottom:8px;">
+                        Secure Card Payment
+                    </h3>
 
-                    <label for="cardNumber">
-                        Card Number
-                    </label>
+                    <p style="color:#888; font-size:13px; line-height:1.6;">
+                        Click "Place Order" to continue to
+                        PayHere Sandbox and securely complete
+                        your card payment.
+                    </p>
 
-                    <input
-                        type="text"
-                        id="cardNumber"
-                        placeholder="0000 0000 0000 0000"
-                        maxlength="19">
-
-                </div>
-
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label for="expiry">
-                            Expiry Date
-                        </label>
-
-                        <input
-                            type="text"
-                            id="expiry"
-                            placeholder="MM/YY"
-                            maxlength="5">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="cvv">
-                            CVV
-                        </label>
-
-                        <input
-                            type="password"
-                            id="cvv"
-                            placeholder="123"
-                            maxlength="3">
-
-                    </div>
+                    <p style="color:#999; font-size:11px; margin-top:8px;">
+                        Your card details are securely handled by PayHere.
+                    </p>
 
                 </div>
 
             </div>
 
-        </div>
+        </section>
 
 
-    </section>
+        <!-- PLACE ORDER -->
+        <button
+            type="button"
+            id="placeOrderButton"
+            class="place-order-btn">
+
+            Place Order
+
+        </button>
 
 
+    </div>
 
-    <!-- ================= RIGHT SIDE ================= -->
 
-    <aside class="order-summary">
+    <!-- RIGHT -->
+    <aside>
 
-        <div class="summary-card">
+
+        <!-- SUMMARY -->
+        <section class="summary-card order-summary">
 
             <div class="summary-heading">
 
-                <h2>
-                    Order Summary
-                </h2>
+                <h2>Order Summary</h2>
 
                 <a href="../cart/cart.php">
                     Edit Cart
@@ -510,15 +335,12 @@
             </div>
 
 
-            <div
-                class="summary-items"
-                id="checkoutItems">
-            </div>
+            <div id="checkoutItems"></div>
 
 
             <div
-                class="empty-summary"
-                id="emptyCheckout">
+                id="emptyCheckout"
+                class="empty-summary">
 
                 Your cart is empty.
 
@@ -530,12 +352,10 @@
 
             <div class="summary-row">
 
-                <span>
-                    Subtotal
-                </span>
+                <span>Subtotal</span>
 
                 <strong id="checkoutSubtotal">
-                    Rs. 0
+                    Rs. 0.00
                 </strong>
 
             </div>
@@ -543,12 +363,10 @@
 
             <div class="summary-row">
 
-                <span>
-                    Delivery
-                </span>
+                <span>Shipping</span>
 
                 <strong id="checkoutShipping">
-                    Rs. 0
+                    Rs. 0.00
                 </strong>
 
             </div>
@@ -559,86 +377,47 @@
 
             <div class="summary-row total-row">
 
-                <span>
-                    Total
-                </span>
+                <span>Total</span>
 
                 <strong id="checkoutTotal">
-                    Rs. 0
+                    Rs. 0.00
                 </strong>
 
             </div>
 
 
-            <button
-                type="button"
-                class="place-order-btn"
-                id="placeOrderButton">
-
-                🔒 PLACE ORDER
-
-            </button>
-
-
-            <div class="secure-text">
-
+            <p class="secure-text">
                 🔒 Secure checkout
+            </p>
 
-            </div>
-
-        </div>
+        </section>
 
 
-        <div class="support-card">
+        <!-- SUPPORT -->
+        <section class="support-card">
 
-            <div>
-                📦
-            </div>
+            <div>💬</div>
 
             <div>
 
-                <h3>
-                    Islandwide Delivery
-                </h3>
+                <h3>Need Help?</h3>
 
                 <p>
-                    Safe delivery across Sri Lanka.
+                    If you have any questions about your
+                    order, please contact Ceylon Tea House.
                 </p>
 
             </div>
 
-        </div>
+        </section>
 
-
-        <div class="support-card">
-
-            <div>
-                🌿
-            </div>
-
-            <div>
-
-                <h3>
-                    Authentic Ceylon Tea
-                </h3>
-
-                <p>
-                    Carefully selected quality products.
-                </p>
-
-            </div>
-
-        </div>
 
     </aside>
-
 
 </main>
 
 
-
-<!-- ================= SUCCESS MODAL ================= -->
-
+<!-- SUCCESS -->
 <div
     class="success-overlay"
     id="successOverlay">
@@ -649,20 +428,17 @@
             ✓
         </div>
 
-        <h2>
-            Order Placed Successfully!
-        </h2>
+        <h2>Order Successful!</h2>
 
         <p>
-            Thank you for shopping with
-            Ceylon Tea House.
+            Thank you for shopping with Ceylon Tea House.
         </p>
 
         <button
             type="button"
             id="continueShoppingButton">
 
-            CONTINUE SHOPPING
+            Continue Shopping
 
         </button>
 
@@ -671,75 +447,22 @@
 </div>
 
 
-
-<!-- ================= FOOTER ================= -->
-
 <footer>
 
     <div class="footer-container">
 
         <div>
-
-            <h2>
-                Ceylon Tea House
-            </h2>
-
+            <h2>Ceylon Tea House</h2>
             <p>
-                Authentic Ceylon Tea<br>
-                from Sri Lanka.
+                Authentic Ceylon Tea.
             </p>
-
-        </div>
-
-
-        <div>
-
-            <h3>
-                Quick Links
-            </h3>
-
-            <a href="../../index.php">
-                Home
-            </a>
-
-            <a href="../../shop.php">
-                Shop
-            </a>
-
-            <a href="#">
-                Contact
-            </a>
-
-        </div>
-
-
-        <div>
-
-            <h3>
-                Customer Service
-            </h3>
-
-            <a href="#">
-                Delivery
-            </a>
-
-            <a href="#">
-                Returns
-            </a>
-
-            <a href="#">
-                FAQ
-            </a>
-
         </div>
 
     </div>
 
-
     <div class="copyright">
 
-        © 2026 Ceylon Tea House.
-        All Rights Reserved.
+        © 2026 Ceylon Tea House. All Rights Reserved.
 
     </div>
 
@@ -749,5 +472,4 @@
 <script src="../../assets/js/checkout.js"></script>
 
 </body>
-
 </html>
