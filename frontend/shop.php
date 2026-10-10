@@ -1,25 +1,214 @@
+<?php
+
+require_once __DIR__ . '/../backend/config/db_connection.php';
+
+
+
+$sql = "SELECT product_id, name, price, stock_qty, image_url, is_active, category, description, weight
+
+        FROM products
+
+        WHERE is_active = 1
+
+        ORDER BY product_id ASC";
+
+$result = $conn->query($sql);
+
+
+
+if (!$result) {
+
+    error_log('Shop products query failed: ' . $conn->error);
+
+    $products = [];
+
+} else {
+
+    $products = $result->fetch_all(MYSQLI_ASSOC);
+
+}
+
+
+
+function e($value) {
+
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+
+}
+
+
+
+/* Legacy display metadata is retained for existing products. New product
+   details are read from the database columns category, description, weight. */
+
+$productDetails = [
+
+    'Premium Ceylon Black Tea' => [
+
+        'category' => 'black-tea', 'label' => 'BLACK TEA', 'popularity' => 24,
+
+        'rating' => 24, 'description' => 'Rich and classic Ceylon tea with a wonderful aroma and smooth taste.',
+
+        'badge' => 'BEST SELLER', 'badge_class' => '', 'slug' => 'black-tea', 'weight' => '250g'
+
+    ],
+
+    'Pure Ceylon Green Tea' => [
+
+        'category' => 'green-tea', 'label' => 'GREEN TEA', 'popularity' => 18,
+
+        'rating' => 18, 'description' => 'Fresh and natural green tea made from carefully selected tea leaves.',
+
+        'badge' => 'NEW', 'badge_class' => 'new', 'slug' => 'green-tea', 'weight' => '250g'
+
+    ],
+
+    'Classic Ceylon Tea Bags' => [
+
+        'category' => 'tea-bags', 'label' => 'TEA BAGS', 'popularity' => 31,
+
+        'rating' => 31, 'description' => 'Convenient tea bags delivering the authentic taste of Ceylon tea.',
+
+        'badge' => 'POPULAR', 'badge_class' => '', 'slug' => 'tea-bags', 'weight' => '250g'
+
+    ],
+
+    'Premium Tea Gift Box' => [
+
+        'category' => 'gift-box', 'label' => 'GIFT BOX', 'popularity' => 27,
+
+        'rating' => 27, 'description' => 'A beautiful selection of premium Ceylon teas, perfect for gifting.',
+
+        'badge' => 'GIFT', 'badge_class' => 'gift', 'slug' => 'premium-tea', 'weight' => '1 Box'
+
+    ],
+
+    'Ceylon Breakfast Tea' => [
+
+        'category' => 'black-tea', 'label' => 'BLACK TEA', 'popularity' => 15,
+
+        'rating' => 15, 'description' => 'A bold and refreshing tea that is perfect for starting your morning.',
+
+        'badge' => '', 'badge_class' => '', 'slug' => 'black-tea', 'weight' => '250g'
+
+    ],
+
+    'Premium Green Tea' => [
+
+        'category' => 'green-tea', 'label' => 'GREEN TEA', 'popularity' => 21,
+
+        'rating' => 21, 'description' => 'Light, refreshing and naturally aromatic premium green tea.',
+
+        'badge' => '', 'badge_class' => '', 'slug' => 'green-tea', 'weight' => '250g'
+
+    ],
+
+    'Ceylon Earl Grey Tea Bags' => [
+
+        'category' => 'tea-bags', 'label' => 'TEA BAGS', 'popularity' => 12,
+
+        'rating' => 12, 'description' => 'Fragrant Ceylon tea bags with a refreshing and elegant flavour.',
+
+        'badge' => '', 'badge_class' => '', 'slug' => 'tea-bags', 'weight' => '250g'
+
+    ],
+
+    'Luxury Ceylon Tea Collection' => [
+
+        'category' => 'gift-box', 'label' => 'GIFT BOX', 'popularity' => 35,
+
+        'rating' => 35, 'description' => 'An elegant collection of selected Ceylon teas for special occasions.',
+
+        'badge' => 'GIFT', 'badge_class' => 'gift', 'slug' => 'premium-tea', 'weight' => '1 Box'
+
+    ],
+
+];
+
+
+
+function product_image_path($imageUrl, $productName) {
+
+    $imageUrl = trim((string)$imageUrl);
+
+    if ($imageUrl !== '') {
+
+        // Keep local project paths and remote image URLs as saved in the database.
+
+        if (preg_match('#^https?://#i', $imageUrl)) {
+
+            return $imageUrl;
+
+        }
+
+        $imageUrl = ltrim($imageUrl, '/');
+
+        if (strpos($imageUrl, 'frontend/') === 0) {
+
+            $imageUrl = substr($imageUrl, strlen('frontend/'));
+
+        }
+
+        if (strpos($imageUrl, 'assets/') === 0) {
+
+            return $imageUrl;
+
+        }
+
+        if (strpos($imageUrl, 'images/') === 0) {
+
+            return 'assets/' . $imageUrl;
+
+        }
+
+        return 'assets/images/' . basename($imageUrl);
+
+    }
+
+
+
+    $name = strtolower($productName);
+
+    if (strpos($name, 'green') !== false) return 'assets/images/green-tea.png.png';
+
+    if (strpos($name, 'bag') !== false || strpos($name, 'earl grey') !== false) return 'assets/images/tea-bags.png.png';
+
+    if (strpos($name, 'gift') !== false || strpos($name, 'collection') !== false) return 'assets/images/gift-box.png.png';
+
+    return 'assets/images/black-tea.png.png';
+
+}
+
+
+
+function cart_image_path($imagePath) {
+
+    if (preg_match('#^https?://#i', $imagePath)) return $imagePath;
+
+    return '../../' . ltrim($imagePath, '/');
+
+}
+
+?>
+
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>
-        Shop | Ceylon Tea House
-    </title>
+    <title>Shop | Ceylon Tea House</title>
 
-    <link
-        rel="stylesheet"
-        href="assets/css/shop.css">
+    <link rel="stylesheet" href="assets/css/shop.css">
 
 </head>
 
 <body>
+
 
 
 <!-- ================= HEADER ================= -->
@@ -28,38 +217,26 @@
 
     <div class="logo">
 
-        <h2>
-            Ceylon Tea House
-        </h2>
+        <h2>Ceylon Tea House</h2>
 
-        <span>
-            Authentic Ceylon Tea
-        </span>
+        <span>Authentic Ceylon Tea</span>
 
     </div>
 
 
+
     <nav>
 
-        <a href="index.php">
-            Home
-        </a>
+        <a href="index.php">Home</a>
 
-        <a
-            href="shop.php"
-            class="active">
-            Shop
-        </a>
+        <a href="shop.php" class="active">Shop</a>
 
-        <a href="#">
-            About
-        </a>
+        <a href="#">About</a>
 
-        <a href="#">
-            Contact
-        </a>
+        <a href="#">Contact</a>
 
     </nav>
+
 
 
     <div class="header-right">
@@ -68,39 +245,30 @@
 
             🔍
 
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="Search tea...">
+            <input type="text" id="searchInput" placeholder="Search tea...">
 
         </div>
+
+
 
         <div class="auth-links">
 
-            <a href="modules/auth/login.php" id="loginLink" class="login-link">
-                Login
-            </a>
+            <a href="modules/auth/login.php" id="loginLink" class="login-link">Login</a>
 
-            <a href="modules/account/account.php" id="accountLink" class="account-link">
-                My Account
-            </a>
+            <a href="modules/account/account.php" id="accountLink" class="account-link">My Account</a>
 
-            <button type="button" id="logoutLink" class="logout-link">
-                Logout
-            </button>
+            <button type="button" id="logoutLink" class="logout-link">Logout</button>
 
         </div>
 
-        <a
-            href="modules/cart/cart.php"
-            class="cart">
-            🛒 Cart
-            <span id="cartCount">0</span>
-        </a>
+
+
+        <a href="modules/cart/cart.php" class="cart">🛒 Cart <span id="cartCount">0</span></a>
 
     </div>
 
 </header>
+
 
 
 <!-- ================= SHOP HERO ================= -->
@@ -109,230 +277,183 @@
 
     <div class="hero-overlay">
 
-        <p>
-            EXPLORE OUR COLLECTION
-        </p>
+        <p>EXPLORE OUR COLLECTION</p>
 
-        <h1>
-            Discover Your Perfect
-            <br>
+        <h1>Discover Your Perfect<br><span>Ceylon Tea</span></h1>
 
-            <span>
-                Ceylon Tea
-            </span>
-        </h1>
-
-        <p class="hero-text">
-
-            Carefully selected teas from the beautiful
-            tea-growing regions of Sri Lanka.
-
-        </p>
+        <p class="hero-text">Carefully selected teas from the beautiful tea-growing regions of Sri Lanka.</p>
 
     </div>
 
 </section>
+
 
 
 <!-- ================= SHOP CONTENT ================= -->
 
 <section class="shop-section">
 
-
-    <!-- ================= HEADING ================= -->
-
     <div class="shop-heading">
 
         <div>
 
-            <p class="small-title">
-                OUR COLLECTION
-            </p>
+            <p class="small-title">OUR COLLECTION</p>
 
-            <h2>
-                Shop Ceylon Tea
-            </h2>
+            <h2>Shop Ceylon Tea</h2>
 
         </div>
 
-
-        <p
-            class="product-count"
-            id="productCount">
-
-            8 Products
-
-        </p>
+        <p class="product-count" id="productCount"><?php echo count($products); ?> Products</p>
 
     </div>
+
 
 
     <!-- ================= FILTER BAR ================= -->
 
     <div class="filter-bar">
 
-
         <div class="categories">
 
-            <button
-                class="filter active"
-                data-filter="all">
+            <button class="filter active" data-filter="all">All</button>
 
-                All
+            <button class="filter" data-filter="black-tea">Black Tea</button>
 
-            </button>
+            <button class="filter" data-filter="green-tea">Green Tea</button>
 
+            <button class="filter" data-filter="tea-bags">Tea Bags</button>
 
-            <button
-                class="filter"
-                data-filter="black-tea">
-
-                Black Tea
-
-            </button>
-
-
-            <button
-                class="filter"
-                data-filter="green-tea">
-
-                Green Tea
-
-            </button>
-
-
-            <button
-                class="filter"
-                data-filter="tea-bags">
-
-                Tea Bags
-
-            </button>
-
-
-            <button
-                class="filter"
-                data-filter="gift-box">
-
-                Gift Boxes
-
-            </button>
+            <button class="filter" data-filter="gift-box">Gift Boxes</button>
 
         </div>
 
 
+
         <select id="sortProducts">
 
-            <option value="default">
-                Sort By
-            </option>
+            <option value="default">Sort By</option>
 
-            <option value="low-high">
-                Price: Low to High
-            </option>
+            <option value="low-high">Price: Low to High</option>
 
-            <option value="high-low">
-                Price: High to Low
-            </option>
+            <option value="high-low">Price: High to Low</option>
 
-            <option value="popular">
-                Popular
-            </option>
+            <option value="popular">Popular</option>
 
         </select>
 
     </div>
 
 
-    <!-- ================= PRODUCTS ================= -->
 
-    <div
-        class="product-grid"
-        id="productGrid">
+    <!-- ================= PRODUCTS FROM DATABASE ================= -->
 
+    <div class="product-grid" id="productGrid">
 
-        <!-- ================================================= -->
-        <!-- PRODUCT 01 -->
-        <!-- ================================================= -->
+        <?php foreach ($products as $product):
 
-        <div
-            class="product-card"
-            data-category="black-tea"
-            data-price="2500"
-            data-popularity="24">
+            $name = (string)$product['name'];
 
+            $details = $productDetails[$name] ?? [
+                'category' => 'all', 'label' => 'CEYLON TEA', 'popularity' => 0,
+                'rating' => 0, 'description' => 'Discover authentic Ceylon tea, carefully selected for you.',
+                'badge' => '', 'badge_class' => '', 'slug' => '', 'weight' => '250g'
+            ];
+
+            // Database values take priority when provided. Legacy mappings keep
+            // the original products looking the same when their fields are blank.
+            $dbCategory = trim((string)($product['category'] ?? ''));
+            $dbDescription = trim((string)($product['description'] ?? ''));
+            $dbWeight = trim((string)($product['weight'] ?? ''));
+            if ($dbCategory !== '') {
+                $details['category'] = strtolower($dbCategory);
+                $details['label'] = strtoupper(str_replace(['-', '_'], ' ', $dbCategory));
+            }
+            if ($dbDescription !== '') {
+                $details['description'] = $dbDescription;
+            }
+            if ($dbWeight !== '') {
+                $details['weight'] = $dbWeight;
+            }
+
+            $imagePath = product_image_path($product['image_url'] ?? '', $name);
+
+            $cartImage = cart_image_path($imagePath);
+
+            $price = (float)$product['price'];
+
+            $stock = (int)$product['stock_qty'];
+
+            $detailUrl = 'modules/shop/product-details.php?product=product-' . (int)$product['product_id'];
+
+        ?>
+
+        <div class="product-card"
+
+             data-category="<?php echo e($details['category']); ?>"
+
+             data-price="<?php echo e($price); ?>"
+
+             data-popularity="<?php echo e($details['popularity']); ?>">
 
             <div class="product-image">
 
-                <span class="badge">
-                    BEST SELLER
-                </span>
+                <?php if ($details['badge'] !== ''): ?>
 
-                <img
-                    src="assets/images/black-tea.png.png"
-                    alt="Premium Ceylon Black Tea">
+                    <span class="badge <?php echo e($details['badge_class']); ?>"><?php echo e($details['badge']); ?></span>
+
+                <?php endif; ?>
 
 
-                <a
-                    href="modules/shop/product-details.php?product=black-tea"
-                    class="quick-view">
 
-                    VIEW FULL DETAILS
+                <img src="<?php echo e($imagePath); ?>" alt="<?php echo e($name); ?>">
 
-                </a>
+                <a href="<?php echo e($detailUrl); ?>" class="quick-view">VIEW FULL DETAILS</a>
 
             </div>
 
 
+
             <div class="product-info">
 
-                <p class="category">
-                    BLACK TEA
-                </p>
+                <p class="category"><?php echo e($details['label']); ?></p>
 
+                <h3><a href="<?php echo e($detailUrl); ?>"><?php echo e($name); ?></a></h3>
 
-                <h3>
-
-                    <a
-                        href="modules/shop/product-details.php?product=black-tea">
-
-                        Premium Ceylon Black Tea
-
-                    </a>
-
-                </h3>
 
 
                 <div class="rating">
 
-                    ★★★★★
+                    <?php echo $details['rating'] > 0 ? '★★★★★' : '☆☆☆☆☆'; ?>
 
-                    <span>
-                        (24)
-                    </span>
+                    <span>(<?php echo e($details['rating']); ?>)</span>
 
                 </div>
 
 
-                <p class="description">
 
-                    Rich and classic Ceylon tea with a
-                    wonderful aroma and smooth taste.
+                <p class="description"><?php echo e($details['description']); ?></p>
 
-                </p>
 
 
                 <div class="product-bottom">
 
-                    <strong>
-                        Rs. 2,500
-                    </strong>
+                    <strong>Rs. <?php echo number_format($price, 2); ?></strong>
 
-                    <button
-                        type="button"
-                        onclick="addProduct('Premium Ceylon Black Tea', 2500, '../../assets/images/black-tea.png.png', '250g')">
+                    <button type="button"
 
-                        🛒 Add
+                            class="add-to-cart-btn"
+
+                            data-name="<?php echo e($name); ?>"
+
+                            data-price="<?php echo e($price); ?>"
+
+                            data-image="<?php echo e($cartImage); ?>"
+
+                            data-weight="<?php echo e($details['weight']); ?>"
+
+                            <?php echo $stock <= 0 ? 'disabled' : ''; ?>>
+
+                        <?php echo $stock <= 0 ? 'Out of Stock' : '🛒 Add'; ?>
 
                     </button>
 
@@ -342,693 +463,38 @@
 
         </div>
 
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT 02 -->
-        <!-- ================================================= -->
-
-        <div
-            class="product-card"
-            data-category="green-tea"
-            data-price="2300"
-            data-popularity="18">
-
-
-            <div class="product-image">
-
-                <span class="badge new">
-                    NEW
-                </span>
-
-                <img
-                    src="assets/images/green-tea.png.png"
-                    alt="Pure Ceylon Green Tea">
-
-
-                <a
-                    href="modules/shop/product-details.php?product=green-tea"
-                    class="quick-view">
-
-                    VIEW FULL DETAILS
-
-                </a>
-
-            </div>
-
-
-            <div class="product-info">
-
-                <p class="category">
-                    GREEN TEA
-                </p>
-
-
-                <h3>
-
-                    <a
-                        href="modules/shop/product-details.php?product=green-tea">
-
-                        Pure Ceylon Green Tea
-
-                    </a>
-
-                </h3>
-
-
-                <div class="rating">
-
-                    ★★★★★
-
-                    <span>
-                        (18)
-                    </span>
-
-                </div>
-
-
-                <p class="description">
-
-                    Fresh and natural green tea made
-                    from carefully selected tea leaves.
-
-                </p>
-
-
-                <div class="product-bottom">
-
-                    <strong>
-                        Rs. 2,300
-                    </strong>
-
-
-                    <button
-                        type="button"
-                        onclick="addProduct('Pure Ceylon Green Tea', 2300, '../../assets/images/green-tea.png.png', '250g')">
-
-                        🛒 Add
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT 03 -->
-        <!-- ================================================= -->
-
-        <div
-            class="product-card"
-            data-category="tea-bags"
-            data-price="1200"
-            data-popularity="31">
-
-
-            <div class="product-image">
-
-                <span class="badge">
-                    POPULAR
-                </span>
-
-
-                <img
-                    src="assets/images/tea-bags.png.png"
-                    alt="Classic Ceylon Tea Bags">
-
-
-                <a
-                    href="modules/shop/product-details.php?product=tea-bags"
-                    class="quick-view">
-
-                    VIEW FULL DETAILS
-
-                </a>
-
-            </div>
-
-
-            <div class="product-info">
-
-                <p class="category">
-                    TEA BAGS
-                </p>
-
-
-                <h3>
-
-                    <a
-                        href="modules/shop/product-details.php?product=tea-bags">
-
-                        Classic Ceylon Tea Bags
-
-                    </a>
-
-                </h3>
-
-
-                <div class="rating">
-
-                    ★★★★★
-
-                    <span>
-                        (31)
-                    </span>
-
-                </div>
-
-
-                <p class="description">
-
-                    Convenient tea bags delivering the
-                    authentic taste of Ceylon tea.
-
-                </p>
-
-
-                <div class="product-bottom">
-
-                    <strong>
-                        Rs. 1,200
-                    </strong>
-
-
-                    <button
-                        type="button"
-                        onclick="addProduct('Classic Ceylon Tea Bags', 1200, '../../assets/images/tea-bags.png.png', '250g')">
-
-                        🛒 Add
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT 04 -->
-        <!-- ================================================= -->
-
-        <div
-            class="product-card"
-            data-category="gift-box"
-            data-price="3500"
-            data-popularity="27">
-
-
-            <div class="product-image">
-
-                <span class="badge gift">
-                    GIFT
-                </span>
-
-
-                <img
-                    src="assets/images/gift-box.png.png"
-                    alt="Premium Tea Gift Box">
-
-
-                <a
-                    href="modules/shop/product-details.php?product=premium-tea"
-                    class="quick-view">
-
-                    VIEW FULL DETAILS
-
-                </a>
-
-            </div>
-
-
-            <div class="product-info">
-
-                <p class="category">
-                    GIFT BOX
-                </p>
-
-
-                <h3>
-
-                    <a
-                        href="modules/shop/product-details.php?product=premium-tea">
-
-                        Premium Tea Gift Box
-
-                    </a>
-
-                </h3>
-
-
-                <div class="rating">
-
-                    ★★★★★
-
-                    <span>
-                        (27)
-                    </span>
-
-                </div>
-
-
-                <p class="description">
-
-                    A beautiful selection of premium
-                    Ceylon teas, perfect for gifting.
-
-                </p>
-
-
-                <div class="product-bottom">
-
-                    <strong>
-                        Rs. 3,500
-                    </strong>
-
-
-                    <button
-                        type="button"
-                        onclick="addProduct('Premium Tea Gift Box', 3500, '../../assets/images/gift-box.png.png', '1 Box')">
-
-                        🛒 Add
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT 05 -->
-        <!-- ================================================= -->
-
-        <div
-            class="product-card"
-            data-category="black-tea"
-            data-price="1950"
-            data-popularity="15">
-
-
-            <div class="product-image">
-
-                <img
-                    src="assets/images/black-tea.png.png"
-                    alt="Ceylon Breakfast Tea">
-
-
-                <a
-                    href="modules/shop/product-details.php?product=black-tea"
-                    class="quick-view">
-
-                    VIEW FULL DETAILS
-
-                </a>
-
-            </div>
-
-
-            <div class="product-info">
-
-                <p class="category">
-                    BLACK TEA
-                </p>
-
-
-                <h3>
-
-                    <a
-                        href="modules/shop/product-details.php?product=black-tea">
-
-                        Ceylon Breakfast Tea
-
-                    </a>
-
-                </h3>
-
-
-                <div class="rating">
-
-                    ★★★★☆
-
-                    <span>
-                        (15)
-                    </span>
-
-                </div>
-
-
-                <p class="description">
-
-                    A bold and refreshing tea that is
-                    perfect for starting your morning.
-
-                </p>
-
-
-                <div class="product-bottom">
-
-                    <strong>
-                        Rs. 1,950
-                    </strong>
-
-
-                    <button
-                        type="button"
-                        onclick="addProduct('Ceylon Breakfast Tea', 1950, '../../assets/images/black-tea.png.png', '250g')">
-
-                        🛒 Add
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT 06 -->
-        <!-- ================================================= -->
-
-        <div
-            class="product-card"
-            data-category="green-tea"
-            data-price="2750"
-            data-popularity="21">
-
-
-            <div class="product-image">
-
-                <img
-                    src="assets/images/green-tea.png.png"
-                    alt="Premium Green Tea">
-
-
-                <a
-                    href="modules/shop/product-details.php?product=green-tea"
-                    class="quick-view">
-
-                    VIEW FULL DETAILS
-
-                </a>
-
-            </div>
-
-
-            <div class="product-info">
-
-                <p class="category">
-                    GREEN TEA
-                </p>
-
-
-                <h3>
-
-                    <a
-                        href="modules/shop/product-details.php?product=green-tea">
-
-                        Premium Green Tea
-
-                    </a>
-
-                </h3>
-
-
-                <div class="rating">
-
-                    ★★★★★
-
-                    <span>
-                        (21)
-                    </span>
-
-                </div>
-
-
-                <p class="description">
-
-                    Light, refreshing and naturally
-                    aromatic premium green tea.
-
-                </p>
-
-
-                <div class="product-bottom">
-
-                    <strong>
-                        Rs. 2,750
-                    </strong>
-
-
-                    <button
-                        type="button"
-                        onclick="addProduct('Premium Green Tea', 2750, '../../assets/images/green-tea.png.png', '250g')">
-
-                        🛒 Add
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT 07 -->
-        <!-- ================================================= -->
-
-        <div
-            class="product-card"
-            data-category="tea-bags"
-            data-price="1650"
-            data-popularity="12">
-
-
-            <div class="product-image">
-
-                <img
-                    src="assets/images/tea-bags.png.png"
-                    alt="Ceylon Earl Grey Tea Bags">
-
-
-                <a
-                    href="modules/shop/product-details.php?product=tea-bags"
-                    class="quick-view">
-
-                    VIEW FULL DETAILS
-
-                </a>
-
-            </div>
-
-
-            <div class="product-info">
-
-                <p class="category">
-                    TEA BAGS
-                </p>
-
-
-                <h3>
-
-                    <a
-                        href="modules/shop/product-details.php?product=tea-bags">
-
-                        Ceylon Earl Grey Tea Bags
-
-                    </a>
-
-                </h3>
-
-
-                <div class="rating">
-
-                    ★★★★★
-
-                    <span>
-                        (12)
-                    </span>
-
-                </div>
-
-
-                <p class="description">
-
-                    Fragrant Ceylon tea bags with a
-                    refreshing and elegant flavour.
-
-                </p>
-
-
-                <div class="product-bottom">
-
-                    <strong>
-                        Rs. 1,650
-                    </strong>
-
-
-                    <button
-                        type="button"
-                        onclick="addProduct('Ceylon Earl Grey Tea Bags', 1650, '../../assets/images/tea-bags.png.png', '250g')">
-
-                        🛒 Add
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ================================================= -->
-        <!-- PRODUCT 08 -->
-        <!-- ================================================= -->
-
-        <div
-            class="product-card"
-            data-category="gift-box"
-            data-price="4500"
-            data-popularity="35">
-
-
-            <div class="product-image">
-
-                <span class="badge gift">
-                    GIFT
-                </span>
-
-
-                <img
-                    src="assets/images/gift-box.png.png"
-                    alt="Luxury Ceylon Tea Collection">
-
-
-                <a
-                    href="modules/shop/product-details.php?product=premium-tea"
-                    class="quick-view">
-
-                    VIEW FULL DETAILS
-
-                </a>
-
-            </div>
-
-
-            <div class="product-info">
-
-                <p class="category">
-                    GIFT BOX
-                </p>
-
-
-                <h3>
-
-                    <a
-                        href="modules/shop/product-details.php?product=premium-tea">
-
-                        Luxury Ceylon Tea Collection
-
-                    </a>
-
-                </h3>
-
-
-                <div class="rating">
-
-                    ★★★★★
-
-                    <span>
-                        (35)
-                    </span>
-
-                </div>
-
-
-                <p class="description">
-
-                    An elegant collection of selected
-                    Ceylon teas for special occasions.
-
-                </p>
-
-
-                <div class="product-bottom">
-
-                    <strong>
-                        Rs. 4,500
-                    </strong>
-
-
-                    <button
-                        type="button"
-                        onclick="addProduct('Luxury Ceylon Tea Collection', 4500, '../../assets/images/gift-box.png.png', '1 Box')">
-
-                        🛒 Add
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
+        <?php endforeach; ?>
 
     </div>
+
 
 
     <!-- ================= NO PRODUCTS MESSAGE ================= -->
 
-    <p
-        id="noProducts"
-        class="no-products">
+    <p id="noProducts" class="no-products" <?php echo count($products) === 0 ? 'style="display:block"' : ''; ?>>
 
-        No products found.
+        <?php echo count($products) === 0 ? 'No products available at the moment.' : 'No products found.'; ?>
 
     </p>
 
 
-    <!-- ================= PAGINATION ================= -->
+
+    <!-- ================= PAGINATION (kept from original design) ================= -->
 
     <div class="pagination">
 
-        <button class="page active">
-            1
-        </button>
+        <button class="page active" type="button">1</button>
 
-        <button class="page">
-            2
-        </button>
+        <button class="page" type="button">2</button>
 
-        <button class="page">
-            3
-        </button>
+        <button class="page" type="button">3</button>
 
-        <button class="next">
-            Next →
-        </button>
+        <button class="next" type="button">Next →</button>
 
     </div>
 
 </section>
+
 
 
 <!-- ================= FOOTER ================= -->
@@ -1037,143 +503,95 @@
 
     <div class="footer-container">
 
-
         <div>
 
-            <h2>
-                Ceylon Tea House
-            </h2>
+            <h2>Ceylon Tea House</h2>
 
-            <p>
-                Authentic Ceylon Tea
-                <br>
-                from Sri Lanka.
-            </p>
+            <p>Authentic Ceylon Tea<br>from Sri Lanka.</p>
 
         </div>
 
 
+
         <div>
 
-            <h3>
-                Quick Links
-            </h3>
+            <h3>Quick Links</h3>
 
-            <a href="index.php">
-                Home
-            </a>
+            <a href="index.php">Home</a>
 
-            <a href="shop.php">
-                Shop
-            </a>
+            <a href="shop.php">Shop</a>
 
-            <a href="#">
-                About Us
-            </a>
+            <a href="#">About Us</a>
 
-            <a href="#">
-                Contact
-            </a>
+            <a href="#">Contact</a>
 
         </div>
 
 
+
         <div>
 
-            <h3>
-                Customer Service
-            </h3>
+            <h3>Customer Service</h3>
 
-            <a href="#">
-                Delivery
-            </a>
+            <a href="#">Delivery</a>
 
-            <a href="#">
-                Returns
-            </a>
+            <a href="#">Returns</a>
 
-            <a href="#">
-                FAQ
-            </a>
+            <a href="#">FAQ</a>
 
         </div>
 
 
+
         <div>
 
-            <h3>
-                Follow Us
-            </h3>
+            <h3>Follow Us</h3>
 
-            <p>
-                Facebook
-            </p>
+            <p>Facebook</p>
 
-            <p>
-                Instagram
-            </p>
+            <p>Instagram</p>
 
         </div>
 
     </div>
 
 
-    <div class="copyright">
 
-        © 2026 Ceylon Tea House.
-        All Rights Reserved.
-
-    </div>
+    <div class="copyright">© 2026 Ceylon Tea House. All Rights Reserved.</div>
 
 </footer>
 
 
 
-<!-- ========================================================= -->
-<!-- JAVASCRIPT -->
-<!-- ========================================================= -->
-
 <script>
-
 
 /* ================= CATEGORY FILTER ================= */
 
-const filterButtons =
-    document.querySelectorAll(".filter");
+const filterButtons = document.querySelectorAll('.filter');
 
-const productCards =
-    document.querySelectorAll(".product-card");
+const productCount = document.getElementById('productCount');
 
-const productCount =
-    document.getElementById("productCount");
+const noProducts = document.getElementById('noProducts');
 
-const noProducts =
-    document.getElementById("noProducts");
+const searchInput = document.getElementById('searchInput');
 
+const sortProducts = document.getElementById('sortProducts');
 
-let currentFilter = "all";
+const productGrid = document.getElementById('productGrid');
+
+let currentFilter = 'all';
+
 
 
 filterButtons.forEach(function(button) {
 
-    button.addEventListener("click", function() {
+    button.addEventListener('click', function() {
 
+        filterButtons.forEach(function(btn) { btn.classList.remove('active'); });
 
-        /* ACTIVE BUTTON */
+        button.classList.add('active');
 
-        filterButtons.forEach(function(btn) {
-
-            btn.classList.remove("active");
-
-        });
-
-
-        button.classList.add("active");
-
-
-        currentFilter =
-            button.getAttribute("data-filter");
-
+        currentFilter = button.getAttribute('data-filter');
 
         filterProducts();
 
@@ -1183,92 +601,51 @@ filterButtons.forEach(function(button) {
 
 
 
-/* ================= SEARCH ================= */
-
-const searchInput =
-    document.getElementById("searchInput");
+searchInput.addEventListener('input', filterProducts);
 
 
-searchInput.addEventListener("input", function() {
-
-    filterProducts();
-
-});
-
-
-
-/* ================= FILTER FUNCTION ================= */
 
 function filterProducts() {
 
-    const searchText =
-        searchInput.value
-        .toLowerCase()
-        .trim();
-
+    const searchText = searchInput.value.toLowerCase().trim();
 
     let visibleProducts = 0;
 
 
-    productCards.forEach(function(card) {
 
+    document.querySelectorAll('.product-card').forEach(function(card) {
 
-        const category =
-            card.getAttribute("data-category");
+        const category = card.getAttribute('data-category');
 
+        const productName = card.querySelector('h3').innerText.toLowerCase();
 
-        const productName =
-            card.querySelector("h3")
-            .innerText
-            .toLowerCase();
+        const categoryText = card.querySelector('.category').innerText.toLowerCase();
 
+        const matchesCategory = currentFilter === 'all' || category === currentFilter;
 
-        const matchesCategory =
-            currentFilter === "all" ||
-            category === currentFilter;
+        const matchesSearch = productName.includes(searchText) || categoryText.includes(searchText);
 
-
-        const matchesSearch =
-            productName.includes(searchText);
 
 
         if (matchesCategory && matchesSearch) {
 
-            card.style.display = "block";
+            card.style.display = '';
 
             visibleProducts++;
 
-        }
+        } else {
 
-        else {
-
-            card.style.display = "none";
+            card.style.display = 'none';
 
         }
 
     });
 
 
-    productCount.innerText =
-        visibleProducts +
-        (visibleProducts === 1
-            ? " Product"
-            : " Products");
 
+    productCount.innerText = visibleProducts + (visibleProducts === 1 ? ' Product' : ' Products');
 
-    if (visibleProducts === 0) {
-
-        noProducts.style.display =
-            "block";
-
-    }
-
-    else {
-
-        noProducts.style.display =
-            "none";
-
-    }
+    noProducts.style.display = visibleProducts === 0 ? 'block' : 'none';
 
 }
 
@@ -1276,67 +653,33 @@ function filterProducts() {
 
 /* ================= SORT PRODUCTS ================= */
 
-const sortProducts =
-    document.getElementById("sortProducts");
+sortProducts.addEventListener('change', function() {
 
-const productGrid =
-    document.getElementById("productGrid");
+    const sortValue = this.value;
 
-
-sortProducts.addEventListener("change", function() {
+    const products = Array.from(document.querySelectorAll('.product-card'));
 
 
-    const sortValue =
-        this.value;
 
+    if (sortValue === 'low-high') {
 
-    const products =
-        Array.from(
-            document.querySelectorAll(".product-card")
-        );
+        products.sort(function(a, b) { return Number(a.dataset.price) - Number(b.dataset.price); });
 
+    } else if (sortValue === 'high-low') {
 
-    if (sortValue === "low-high") {
+        products.sort(function(a, b) { return Number(b.dataset.price) - Number(a.dataset.price); });
 
-        products.sort(function(a, b) {
+    } else if (sortValue === 'popular') {
 
-            return Number(a.dataset.price) -
-                   Number(b.dataset.price);
-
-        });
+        products.sort(function(a, b) { return Number(b.dataset.popularity) - Number(a.dataset.popularity); });
 
     }
 
 
-    else if (sortValue === "high-low") {
 
-        products.sort(function(a, b) {
+    products.forEach(function(product) { productGrid.appendChild(product); });
 
-            return Number(b.dataset.price) -
-                   Number(a.dataset.price);
-
-        });
-
-    }
-
-
-    else if (sortValue === "popular") {
-
-        products.sort(function(a, b) {
-
-            return Number(b.dataset.popularity) -
-                   Number(a.dataset.popularity);
-
-        });
-
-    }
-
-
-    products.forEach(function(product) {
-
-        productGrid.appendChild(product);
-
-    });
+    filterProducts();
 
 });
 
@@ -1346,138 +689,154 @@ sortProducts.addEventListener("change", function() {
 
 function addProduct(name, price, image, weight) {
 
-    let cart =
-        JSON.parse(localStorage.getItem("ceylonTeaCart")) || [];
-
+    let cart = JSON.parse(localStorage.getItem('ceylonTeaCart')) || [];
 
     const existingProduct = cart.find(function(item) {
 
-        return item.name === name &&
-               item.weight === weight;
+        return item.name === name && item.weight === weight;
 
     });
+
 
 
     if (existingProduct) {
 
         existingProduct.quantity++;
 
-    }
+    } else {
 
-    else {
-
-        cart.push({
-            name: name,
-            price: price,
-            image: image,
-            weight: weight,
-            quantity: 1
-        });
+        cart.push({ name: name, price: Number(price), image: image, weight: weight, quantity: 1 });
 
     }
 
 
-    localStorage.setItem(
-        "ceylonTeaCart",
-        JSON.stringify(cart)
-    );
 
+    localStorage.setItem('ceylonTeaCart', JSON.stringify(cart));
 
     updateCartCount();
 
-    alert(name + " added to cart!");
+    alert(name + ' added to cart!');
 
 }
+
+
+
+document.querySelectorAll('.add-to-cart-btn').forEach(function(button) {
+
+    button.addEventListener('click', function() {
+
+        addProduct(
+
+            this.dataset.name,
+
+            this.dataset.price,
+
+            this.dataset.image,
+
+            this.dataset.weight
+
+        );
+
+    });
+
+});
+
 
 
 /* ================= CART COUNT ================= */
 
 function updateCartCount() {
 
-    const cart =
-        JSON.parse(localStorage.getItem("ceylonTeaCart")) || [];
+    const cart = JSON.parse(localStorage.getItem('ceylonTeaCart')) || [];
 
     let count = 0;
 
+    cart.forEach(function(item) { count += Number(item.quantity) || 0; });
 
-    cart.forEach(function(item) {
+    const cartCount = document.getElementById('cartCount');
 
-        count += Number(item.quantity);
-
-    });
-
-
-    const cartCount =
-        document.getElementById("cartCount");
-
-
-    if (cartCount) {
-
-        cartCount.innerText = count;
-
-    }
+    if (cartCount) cartCount.innerText = count;
 
 }
+
 
 
 /* ================= AUTH HEADER ================= */
 
 function updateAuthHeader() {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const currentUser = localStorage.getItem("currentUser");
 
-    const loginLink = document.getElementById("loginLink");
-    const accountLink = document.getElementById("accountLink");
-    const logoutLink = document.getElementById("logoutLink");
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
 
-    if (isLoggedIn === "true" && currentUser) {
-        loginLink.style.display = "none";
-        accountLink.style.display = "inline-block";
-        logoutLink.style.display = "inline-block";
+    const currentUser = localStorage.getItem('currentUser');
+
+    const loginLink = document.getElementById('loginLink');
+
+    const accountLink = document.getElementById('accountLink');
+
+    const logoutLink = document.getElementById('logoutLink');
+
+
+
+    if (isLoggedIn === 'true' && currentUser) {
+
+        loginLink.style.display = 'none';
+
+        accountLink.style.display = 'inline-block';
+
+        logoutLink.style.display = 'inline-block';
+
     } else {
-        loginLink.style.display = "inline-block";
-        accountLink.style.display = "none";
-        logoutLink.style.display = "none";
+
+        loginLink.style.display = 'inline-block';
+
+        accountLink.style.display = 'none';
+
+        logoutLink.style.display = 'none';
+
     }
+
 }
+
 
 
 /* ================= LOGOUT ================= */
 
 function logoutUser() {
-    const answer = confirm("Are you sure you want to logout?");
 
-    if (!answer) {
-        return;
-    }
+    if (!confirm('Are you sure you want to logout?')) return;
 
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("redirectAfterLogin");
+    localStorage.removeItem('isLoggedIn');
 
-    window.location.href = "index.php";
+    localStorage.removeItem('loggedInUser');
+
+    localStorage.removeItem('currentUser');
+
+    localStorage.removeItem('redirectAfterLogin');
+
+    window.location.href = 'index.php';
+
 }
 
 
-const logoutLink = document.getElementById("logoutLink");
 
-if (logoutLink) {
-    logoutLink.addEventListener("click", function() {
-        logoutUser();
-    });
-}
+const logoutLink = document.getElementById('logoutLink');
+
+if (logoutLink) logoutLink.addEventListener('click', logoutUser);
 
 
-/* ================= PAGE LOAD ================= */
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
+
     updateCartCount();
+
     updateAuthHeader();
+
+    filterProducts();
+
 });
 
-
 </script>
+
 
 
 </body>
