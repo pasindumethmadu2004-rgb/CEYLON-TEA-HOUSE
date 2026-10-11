@@ -8,22 +8,25 @@ $config = require __DIR__ . '/../config/payhere_config.php';
 $merchantId = trim((string)($config['merchant_id'] ?? ''));
 $merchantSecret = trim((string)($config['merchant_secret'] ?? ''));
 
-function logPayHere(string $message): void
+function notifyLog(string $message): void
 {
-    error_log('[PayHere notify] ' . $message);
+    error_log('[PayHere] ' . $message);
+}
+
+function notifyExit(int $status, string $message): void
+{
+    http_response_code($status);
+    echo $message;
+    exit;
 }
 
 if (
     $merchantId === '' ||
     $merchantSecret === '' ||
-    $merchantSecret === 'MzQ0ODg1MzkzMjE3NzU1Njg4OTkzMTU5ODQ1OTkwMTgwNTA0MzQ3T'
+    $merchantSecret === 'PASTE_NEW_MERCHANT_SECRET_HERE'
 ) {
-    http_response_code(500);
-    logPayHere('PayHere credentials are not configured.');
-    exit('Configuration error');
+    notifyExit(500, 'PayHere configuration error');
 }
-
-$data = $_POST;
 
 $required = [
     'merchant_id',
@@ -35,68 +38,61 @@ $required = [
 ];
 
 foreach ($required as $key) {
-    if (!isset($data[$key]) || $data[$key] === '') {
-        http_response_code(400);
-        logPayHere('Missing field: ' . $key);
-        exit('Missing notification data');
+    if (!isset($_POST[$key]) || $_POST[$key] === '') {
+        notifyExit(400, 'Missing notification field');
     }
 }
 
-$receivedMerchantId = (string)$data['merchant_id'];
-$orderId = filter_var($data['order_id'], FILTER_VALIDATE_INT);
-$amount = (string)$data['payhere_amount'];
-$currency = (string)$data['payhere_currency'];
-$statusCode = (string)$data['status_code'];
-$receivedSignature = strtoupper((string)$data['md5sig']);
+$receivedMerchantId = (string)$_POST['merchant_id'];
+$orderId = filter_var($_POST['order_id'], FILTER_VALIDATE_INT);
+$amount = (string)$_POST['payhere_amount'];
+$currency = (string)$_POST['payhere_currency'];
+$statusCode = (string)$_POST['status_code'];
+$receivedSignature = strtoupper((string)$_POST['md5sig']);
 
-if (!$orderId || !is_numeric($amount) || !is_finite((float)$amount)) {
-    http_response_code(400);
-    exit('Invalid notification data');
+if (
+    $orderId === false ||
+    $orderId === null ||
+    $orderId < 1 ||
+    !is_numeric($amount) ||
+    !is_finite((float)$amount) ||
+    (float)$amount < 0
+) {
+    notifyExit(400, 'Invalid notification data');
 }
 
-$localSignature = strtoupper(
-    md5(
-        $receivedMerchantId .
-        $orderId .
-        $amount .
-        $currency .
-        $statusCode .
-        strtoupper(md5($merchantSecret))
-    )
-);
+$expectedSignature = strtoupper(md5(
+    $receivedMerchantId .
+    (string)$orderId .
+    $amount .
+    $currency .
+    $statusCode .
+    strtoupper(md5($merchantSecret))
+));
 
-if (!hash_equals($localSignature, $receivedSignature)) {
-    http_response_code(400);
-    logPayHere('Signature verification failed.');
-    exit('Invalid signature');
+if (!hash_equals($expectedSignature, $receivedSignature)) {
+    notifyLog('Invalid notification signature.');
+    notifyExit(400, 'Invalid signature');
 }
 
-if (!hash_equals($merchantId, $receivedMerchantId)) {
-    http_response_code(400);
-    logPayHere('Merchant ID mismatch.');
-    exit('Invalid merchant');
+if (
+    !hash_equals($merchantId, $receivedMerchantId) ||
+    $currency !== 'LKR'
+) {
+    notifyExit(400, 'Merchant or currency mismatch');
 }
 
-if ($currency !== 'LKR') {
-    http_response_code(400);
-    logPayHere('Currency mismatch.');
-    exit('Invalid currency');
-}
+$paymentId = trim((string)($_POST['payment_id'] ?? ''));
 
 try {
     $conn->begin_transaction();
 
     $stmt = $conn->prepare(
-        "SELECT total_amount, payment_method, payment_status
+        'SELECT total_amount, payment_method, payment_status, status
          FROM orders
          WHERE order_id = ?
-         FOR UPDATE"
+         FOR UPDATE'
     );
-
-    if (!$stmt) {
-        throw new RuntimeException('Could not prepare order query.');
-    }
-
     $stmt->bind_param('i', $orderId);
     $stmt->execute();
     $order = $stmt->get_result()->fetch_assoc();
@@ -104,44 +100,50 @@ try {
 
     if (!$order) {
         $conn->rollback();
-        http_response_code(404);
-        exit('Order not found');
+        notifyExit(404, 'Order not found');
     }
 
     if (strtolower((string)$order['payment_method']) !== 'card') {
         $conn->rollback();
-        http_response_code(400);
-        exit('Not a card order');
+        notifyExit(400, 'Not a card order');
     }
 
-    $savedAmount = number_format(
+    $expectedAmount = number_format(
         (float)$order['total_amount'],
         2,
         '.',
         ''
     );
+    $receivedAmount = number_format((float)$amount, 2, '.', '');
 
-    $receivedAmount = number_format(
-        (float)$amount,
-        2,
-        '.',
-        ''
-    );
-
-    if ($savedAmount !== $receivedAmount) {
+    if ($expectedAmount !== $receivedAmount) {
         $conn->rollback();
-        logPayHere('Payment amount mismatch for order ' . $orderId);
-        http_response_code(400);
-        exit('Amount mismatch');
+        notifyLog('Amount mismatch for order ' . $orderId);
+        notifyExit(400, 'Amount mismatch');
     }
 
-    $paymentId = isset($data['payment_id'])
-        ? trim((string)$data['payment_id'])
-        : '';
+    $currentPaymentStatus = strtolower(
+        (string)$order['payment_status']
+    );
+    $currentOrderStatus = strtolower((string)$order['status']);
 
     if ($statusCode === '2') {
-        // Do not overwrite an order that has already been marked paid.
-        if (strtolower((string)$order['payment_status']) !== 'paid') {
+        /*
+         * Do not revive an order whose stock has already been released.
+         */
+        if (
+            in_array($currentPaymentStatus, ['cancelled', 'failed'], true) ||
+            $currentOrderStatus === 'cancelled'
+        ) {
+            $conn->rollback();
+            notifyLog(
+                'Successful notification received after order cancellation: '
+                . $orderId
+            );
+            notifyExit(409, 'Order is already cancelled or failed');
+        }
+
+        if ($currentPaymentStatus !== 'paid') {
             $stmt = $conn->prepare(
                 "UPDATE orders
                  SET payment_status = 'Paid',
@@ -149,51 +151,87 @@ try {
                      payment_reference = ?
                  WHERE order_id = ?"
             );
-
-            if (!$stmt) {
-                throw new RuntimeException('Could not prepare paid update.');
-            }
-
             $stmt->bind_param('si', $paymentId, $orderId);
             $stmt->execute();
             $stmt->close();
         }
-    } elseif ($statusCode === '-1') {
-        if (strtolower((string)$order['payment_status']) !== 'paid') {
-            $stmt = $conn->prepare(
-                "UPDATE orders
-                 SET payment_status = 'Cancelled',
-                     status = 'Cancelled',
-                     payment_reference = ?
-                 WHERE order_id = ?"
+
+    } elseif ($statusCode === '-1' || $statusCode === '-2') {
+        /*
+         * Release reserved stock only on the first transition from Pending.
+         * Order-row locking plus the status check prevents duplicate release.
+         */
+        if ($currentPaymentStatus === 'pending') {
+            $itemStmt = $conn->prepare(
+                'SELECT product_id, quantity
+                 FROM order_items
+                 WHERE order_id = ?'
+            );
+            $itemStmt->bind_param('i', $orderId);
+            $itemStmt->execute();
+            $itemsResult = $itemStmt->get_result();
+
+            $stockStmt = $conn->prepare(
+                'UPDATE products
+                 SET stock_qty = stock_qty + ?
+                 WHERE product_id = ?'
             );
 
-            if (!$stmt) {
-                throw new RuntimeException('Could not prepare cancel update.');
+            while ($item = $itemsResult->fetch_assoc()) {
+                $quantity = (int)$item['quantity'];
+                $productId = (int)$item['product_id'];
+
+                $stockStmt->bind_param(
+                    'ii',
+                    $quantity,
+                    $productId
+                );
+                $stockStmt->execute();
+
+                if ($stockStmt->affected_rows !== 1) {
+                    throw new RuntimeException(
+                        'Could not release reserved product stock.'
+                    );
+                }
+            }
+
+            $stockStmt->close();
+            $itemStmt->close();
+
+            if ($statusCode === '-1') {
+                $stmt = $conn->prepare(
+                    "UPDATE orders
+                     SET payment_status = 'Cancelled',
+                         status = 'Cancelled',
+                         payment_reference = ?
+                     WHERE order_id = ?"
+                );
+            } else {
+                $stmt = $conn->prepare(
+                    "UPDATE orders
+                     SET payment_status = 'Failed',
+                         status = 'Cancelled',
+                         payment_reference = ?
+                     WHERE order_id = ?"
+                );
             }
 
             $stmt->bind_param('si', $paymentId, $orderId);
             $stmt->execute();
             $stmt->close();
-        }
-    } elseif ($statusCode === '-2') {
-        if (strtolower((string)$order['payment_status']) !== 'paid') {
-            $stmt = $conn->prepare(
-                "UPDATE orders
-                 SET payment_status = 'Failed',
-                     payment_reference = ?
-                 WHERE order_id = ?"
+
+        } else {
+            notifyLog(
+                'Failure/cancellation notification ignored for non-pending order '
+                . $orderId
             );
-
-            if (!$stmt) {
-                throw new RuntimeException('Could not prepare failed update.');
-            }
-
-            $stmt->bind_param('si', $paymentId, $orderId);
-            $stmt->execute();
-            $stmt->close();
         }
+
     } elseif ($statusCode === '-3') {
+        /*
+         * A chargeback is not the same as an unpaid order.
+         * Do not automatically restock goods that may already be shipped.
+         */
         $stmt = $conn->prepare(
             "UPDATE orders
              SET payment_status = 'Chargedback',
@@ -201,17 +239,12 @@ try {
                  payment_reference = ?
              WHERE order_id = ?"
         );
-
-        if (!$stmt) {
-            throw new RuntimeException('Could not prepare chargeback update.');
-        }
-
         $stmt->bind_param('si', $paymentId, $orderId);
         $stmt->execute();
         $stmt->close();
+
     } else {
-        // Unknown status codes are logged and not treated as success.
-        logPayHere('Unhandled status code: ' . $statusCode);
+        notifyLog('Unhandled status code: ' . $statusCode);
     }
 
     $conn->commit();
@@ -223,10 +256,13 @@ try {
     try {
         $conn->rollback();
     } catch (Throwable $ignored) {
-        // Transaction may already have been rolled back.
+        // Ignore rollback errors.
     }
 
-    logPayHere('Notification processing failed: ' . $e->getMessage());
+    notifyLog(
+        'Notification processing error for order '
+        . $orderId . ': ' . $e->getMessage()
+    );
 
     http_response_code(500);
     echo 'Notification processing failed';
