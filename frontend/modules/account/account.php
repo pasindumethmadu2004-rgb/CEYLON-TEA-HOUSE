@@ -521,7 +521,7 @@
 
 
 
-<script src="../../assets/js/account.js?v=1"></script>
+<script src="../../assets/js/account.js?v=2"></script>
 
 </body>
 

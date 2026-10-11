@@ -1,362 +1,120 @@
-/* ==================================================
-   CEYLON TEA HOUSE - LOGIN
-================================================== */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('loginForm');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const message = document.getElementById('loginMessage');
+    const toggle = document.getElementById('togglePassword');
 
+    function showMessage(text, type = 'error') {
+        if (!message) {
+            alert(text);
+            return;
+        }
 
-        const CART_KEY =
-            "ceylonTeaCart";
+        message.textContent = text;
+        message.className = 'login-message ' + type;
+    }
 
+    // Show or hide password
+    if (toggle && password) {
+        toggle.addEventListener('click', () => {
+            const show = password.type === 'password';
 
-        /* ================= CART COUNT ================= */
+            password.type = show ? 'text' : 'password';
+            toggle.textContent = show ? '🙈' : '👁';
+        });
+    }
 
-        function updateCartCount() {
+    if (!form || !email || !password) {
+        console.error('Login form elements were not found.');
+        return;
+    }
 
-            const cart =
-                JSON.parse(
-                    localStorage.getItem(
-                        CART_KEY
-                    )
-                ) || [];
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
+        const emailValue = email.value.trim().toLowerCase();
+        const passwordValue = password.value;
 
-            let count = 0;
+        if (!emailValue || !passwordValue) {
+            showMessage('Please enter your email and password.');
+            return;
+        }
 
+        const button = form.querySelector('[type="submit"]');
 
-            cart.forEach(
-                function (item) {
+        if (button) {
+            button.disabled = true;
+        }
 
-                    count +=
-                        Number(
-                            item.quantity || 0
-                        );
-
+        try {
+            const response = await fetch(
+                '/CEYLON-TEA-HOUSE/backend/api/login.php',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        email: emailValue,
+                        password: passwordValue
+                    })
                 }
             );
 
+            const result = await response.json();
 
-            const cartCount =
-                document.getElementById(
-                    "cartCount"
+            if (!response.ok || !result.success) {
+                showMessage(
+                    result.message || 'Invalid email or password.'
                 );
-
-
-            if (cartCount) {
-
-                cartCount.innerText =
-                    count;
-
-            }
-
-        }
-
-
-        updateCartCount();
-
-
-
-        /* ================= ELEMENTS ================= */
-
-        const loginForm =
-            document.getElementById(
-                "loginForm"
-            );
-
-
-        const email =
-            document.getElementById(
-                "email"
-            );
-
-
-        const password =
-            document.getElementById(
-                "password"
-            );
-
-
-        const togglePassword =
-            document.getElementById(
-                "togglePassword"
-            );
-
-
-        const loginMessage =
-            document.getElementById(
-                "loginMessage"
-            );
-
-
-
-        /* ================= PASSWORD SHOW / HIDE ================= */
-
-        if (
-            togglePassword &&
-            password
-        ) {
-
-            togglePassword.addEventListener(
-                "click",
-                function () {
-
-
-                    if (
-                        password.type ===
-                        "password"
-                    ) {
-
-                        password.type =
-                            "text";
-
-                        togglePassword.innerText =
-                            "🙈";
-
-                    }
-
-                    else {
-
-                        password.type =
-                            "password";
-
-                        togglePassword.innerText =
-                            "👁";
-
-                    }
-
-                }
-            );
-
-        }
-
-
-
-        /* ================= MESSAGE ================= */
-
-        function showMessage(
-            text,
-            type
-        ) {
-
-            if (!loginMessage) {
                 return;
             }
 
-
-            loginMessage.innerText =
-                text;
-
-
-            loginMessage.className =
-                "login-message " +
-                type;
-
-        }
-
-
-
-        /* ================= LOGIN ================= */
-
-        if (loginForm) {
-
-            loginForm.addEventListener(
-                "submit",
-                function (event) {
-
-
-                    event.preventDefault();
-
-
-                    const emailValue =
-                        email.value
-                            .trim()
-                            .toLowerCase();
-
-
-                    const passwordValue =
-                        password.value;
-
-
-
-                    /* ================= VALIDATION ================= */
-
-                    if (
-                        emailValue === "" ||
-                        passwordValue === ""
-                    ) {
-
-                        showMessage(
-                            "Please enter your email and password.",
-                            "error"
-                        );
-
-                        return;
-
-                    }
-
-
-
-                    /* ================= GET REGISTERED USERS ================= */
-
-                    const users =
-                        JSON.parse(
-                            localStorage.getItem(
-                                "ceylonTeaUsers"
-                            )
-                        ) || [];
-
-
-
-                    /* ================= FIND USER ================= */
-
-                    const user =
-                        users.find(
-                            function (item) {
-
-                                return (
-                                    item.email
-                                        .toLowerCase() ===
-                                        emailValue &&
-
-                                    item.password ===
-                                        passwordValue
-                                );
-
-                            }
-                        );
-
-
-
-                    /* ================= INVALID LOGIN ================= */
-
-                    if (!user) {
-
-                        showMessage(
-                            "Invalid email or password.",
-                            "error"
-                        );
-
-                        return;
-
-                    }
-
-
-
-                    /* ==================================================
-                       LOGIN SUCCESS
-                    ================================================== */
-
-                    localStorage.setItem(
-                        "isLoggedIn",
-                        "true"
-                    );
-
-
-                    localStorage.setItem(
-                        "loggedInUser",
-                        user.email
-                    );
-
-
-                    localStorage.setItem(
-                        "currentUser",
-                        JSON.stringify(
-                            user
-                        )
-                    );
-
-
-                    showMessage(
-                        "Login successful!",
-                        "success"
-                    );
-
-
-
-                    /* ==================================================
-                       REDIRECT
-                    ==================================================
-
-                       CASE 1
-
-                       Normal Login
-                           ↓
-                       Home
-
-
-                       CASE 2
-
-                       Cart
-                           ↓
-                       Proceed Checkout
-                           ↓
-                       Login
-                           ↓
-                       Checkout
-
-
-                       CASE 3
-
-                       Protected My Account
-                           ↓
-                       Login
-                           ↓
-                       My Account
-
-                    ================================================== */
-
-
-                    const redirect =
-                        localStorage.getItem(
-                            "redirectAfterLogin"
-                        );
-
-
-                    setTimeout(
-                        function () {
-
-
-                            if (redirect) {
-
-
-                                /*
-                                    Remove AFTER reading
-                                    redirect destination.
-                                */
-
-                                localStorage.removeItem(
-                                    "redirectAfterLogin"
-                                );
-
-
-                                window.location.href =
-                                    redirect;
-
-                            }
-
-                            else {
-
-
-                                /*
-                                    Normal login
-                                    goes HOME.
-                                */
-
-                                window.location.href =
-                                    "../../index.php";
-
-                            }
-
-                        },
-                        700
-                    );
-
-                }
+            showMessage('Login successful!', 'success');
+
+            // Get the destination saved before login
+            const redirect = localStorage.getItem(
+                'redirectAfterLogin'
             );
 
-        }
+            // Remove old client-side login indicators
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('loggedInUser');
+            localStorage.removeItem('currentUser');
 
-    }
-);
+            // Default destination for a normal login
+            let destination =
+                '/CEYLON-TEA-HOUSE/frontend/index.php';
+
+            // If the customer came from checkout, return there
+            if (
+                redirect &&
+                redirect.startsWith('/CEYLON-TEA-HOUSE/') &&
+                !redirect.startsWith('//')
+            ) {
+                destination = redirect;
+            }
+
+            // Remove the saved destination after reading it
+            localStorage.removeItem('redirectAfterLogin');
+
+            setTimeout(() => {
+                window.location.href = destination;
+            }, 500);
+
+        } catch (error) {
+            console.error('Login error:', error);
+
+            showMessage(
+                'Unable to connect. Please check XAMPP and try again.'
+            );
+        } finally {
+            if (button) {
+                button.disabled = false;
+            }
+        }
+    });
+});

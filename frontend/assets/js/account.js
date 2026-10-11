@@ -1,744 +1,276 @@
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
 
-        // ==========================================
-        // LOGIN / PROTECTED ROUTE CHECK
-        // ==========================================
+document.addEventListener("DOMContentLoaded", async function () {
+    const ACCOUNT_API =
+        "/CEYLON-TEA-HOUSE/backend/api/account.php";
 
-        const isLoggedIn =
-            localStorage.getItem(
-                "isLoggedIn"
-            );
+    const LOGIN_URL =
+        "/CEYLON-TEA-HOUSE/frontend/modules/auth/login.php";
 
-        const currentUserData =
-            localStorage.getItem(
-                "currentUser"
-            );
+    const HOME_URL =
+        "/CEYLON-TEA-HOUSE/frontend/index.php";
 
+    const CART_KEY = "ceylonTeaCart";
 
-        /*
-            Login wela nathnam
-            account page eka balanna denne naha.
-        */
+    const firstName = document.getElementById("firstName");
+    const lastName = document.getElementById("lastName");
+    const email = document.getElementById("profileEmail");
+    const phone = document.getElementById("phone");
+    const profileForm = document.getElementById("profileForm");
+    const profileMessage = document.getElementById("profileMessage");
+    const editButton = document.getElementById("editProfileButton");
+    const saveButton = document.getElementById("saveProfileButton");
+    const sidebarName = document.getElementById("sidebarName");
+    const sidebarEmail = document.getElementById("sidebarEmail");
+    const avatar = document.getElementById("profileAvatar");
+    const logoutButton = document.getElementById("logoutButton");
+    const logoutOverlay = document.getElementById("logoutOverlay");
+    const cancelLogout = document.getElementById("cancelLogout");
+    const confirmLogout = document.getElementById("confirmLogout");
 
-        if (
-            isLoggedIn !== "true" ||
-            !currentUserData
-        ) {
+    let editing = false;
+    let originalProfile = {};
 
-            localStorage.setItem(
-                "redirectAfterLogin",
-                "../account/account.php"
-            );
+    function showMessage(text, type = "error") {
+        if (!profileMessage) return;
+        profileMessage.textContent = text;
+        profileMessage.className = "profile-message " + type;
+    }
 
-            window.location.replace(
-                "../auth/login.php"
-            );
+    function clearMessage() {
+        showMessage("", "");
+    }
 
-            return;
+    function setEditMode(enabled) {
+        editing = enabled;
+
+        [firstName, lastName, email, phone].forEach(function (field) {
+            if (field) field.disabled = !enabled;
+        });
+
+        if (saveButton) saveButton.disabled = !enabled;
+        if (editButton) {
+            editButton.textContent = enabled ? "CANCEL EDIT" : "EDIT PROFILE";
         }
+    }
 
+    function updateSummary(name, emailValue) {
+        const fullName = (name || "Customer").trim();
 
-        // ==========================================
-        // CURRENT USER
-        // ==========================================
+        if (sidebarName) sidebarName.textContent = fullName;
+        if (sidebarEmail) sidebarEmail.textContent = emailValue || "";
+        if (avatar) avatar.textContent = fullName.charAt(0).toUpperCase();
+    }
 
-        let currentUser;
+    function updateCartCount() {
+        let cart = [];
 
         try {
-
-            currentUser =
-                JSON.parse(
-                    currentUserData
-                );
-
+            cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
         } catch (error) {
-
-            logoutUser();
-
-            return;
+            cart = [];
         }
 
+        const count = cart.reduce(function (total, item) {
+            return total + Math.max(0, Number(item.quantity) || 0);
+        }, 0);
 
-        // ==========================================
-        // ELEMENTS
-        // ==========================================
+        const cartCount = document.getElementById("cartCount");
+        if (cartCount) cartCount.textContent = count;
+    }
 
-        const firstName =
-            document.getElementById(
-                "firstName"
-            );
-
-        const lastName =
-            document.getElementById(
-                "lastName"
-            );
-
-        const email =
-            document.getElementById(
-                "profileEmail"
-            );
-
-        const phone =
-            document.getElementById(
-                "phone"
-            );
-
-        const profileForm =
-            document.getElementById(
-                "profileForm"
-            );
-
-        const profileMessage =
-            document.getElementById(
-                "profileMessage"
-            );
-
-        const editProfileButton =
-            document.getElementById(
-                "editProfileButton"
-            );
-
-        const saveProfileButton =
-            document.getElementById(
-                "saveProfileButton"
-            );
-
-        const sidebarName =
-            document.getElementById(
-                "sidebarName"
-            );
-
-        const sidebarEmail =
-            document.getElementById(
-                "sidebarEmail"
-            );
-
-        const profileAvatar =
-            document.getElementById(
-                "profileAvatar"
-            );
-
-        const logoutButton =
-            document.getElementById(
-                "logoutButton"
-            );
-
-        const logoutOverlay =
-            document.getElementById(
-                "logoutOverlay"
-            );
-
-        const cancelLogout =
-            document.getElementById(
-                "cancelLogout"
-            );
-
-        const confirmLogout =
-            document.getElementById(
-                "confirmLogout"
-            );
-
-
-        // ==========================================
-        // CART COUNT
-        // ==========================================
-
-        function updateCartCount() {
-
-            const cart =
-                JSON.parse(
-                    localStorage.getItem(
-                        "ceylonTeaCart"
-                    )
-                ) || [];
-
-
-            let count = 0;
-
-
-            cart.forEach(
-                function(item) {
-
-                    count +=
-                        Number(
-                            item.quantity
-                        );
-                }
-            );
-
-
-            const cartCount =
-                document.getElementById(
-                    "cartCount"
-                );
-
-
-            if (cartCount) {
-
-                cartCount.innerText =
-                    count;
+    async function apiRequest(url, options = {}) {
+        const response = await fetch(url, {
+            credentials: "same-origin",
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                ...(options.headers || {})
             }
+        });
+
+        const result = await response.json();
+
+        if (response.status === 401) {
+            localStorage.setItem(
+                "redirectAfterLogin",
+                window.location.pathname
+            );
+            window.location.replace(LOGIN_URL);
+            throw new Error("Please log in again.");
         }
 
+        if (!response.ok || result.success === false) {
+            throw new Error(result.message || "Request failed.");
+        }
 
+        return result;
+    }
+
+    // Check the real PHP login session.
+    try {
+        const result = await apiRequest(ACCOUNT_API);
+
+        const user = result.user;
+
+        if (!user) {
+            throw new Error("Account details were not returned.");
+        }
+
+        const fullName = user.full_name || user.name || "";
+        const nameParts = fullName.trim().split(/\s+/);
+
+        originalProfile = {
+            firstName: user.first_name || nameParts[0] || "",
+            lastName: user.last_name || nameParts.slice(1).join(" "),
+            email: user.email || "",
+            phone: user.phone || ""
+        };
+
+        firstName.value = originalProfile.firstName;
+        lastName.value = originalProfile.lastName;
+        email.value = originalProfile.email;
+        phone.value = originalProfile.phone;
+
+        updateSummary(fullName, originalProfile.email);
+        setEditMode(false);
         updateCartCount();
 
+    } catch (error) {
+        console.error("Account loading error:", error);
 
-        // ==========================================
-        // LOAD PROFILE
-        // ==========================================
-
-        function loadProfile() {
-
-            firstName.value =
-                currentUser.firstName || "";
-
-            lastName.value =
-                currentUser.lastName || "";
-
-            email.value =
-                currentUser.email || "";
-
-            phone.value =
-                currentUser.phone || "";
-
-
-            updateProfileSummary();
-
-
-            /*
-                Page open unama
-                fields edit karanna ba.
-
-                EDIT PROFILE click karanna one.
-            */
-
-            setEditMode(false);
-        }
-
-
-        // ==========================================
-        // PROFILE SUMMARY
-        // ==========================================
-
-        function updateProfileSummary() {
-
-            const fullName =
-                (
-                    (currentUser.firstName || "") +
-                    " " +
-                    (currentUser.lastName || "")
-                ).trim();
-
-
-            if (sidebarName) {
-
-                sidebarName.innerText =
-                    fullName || "Customer";
-            }
-
-
-            if (sidebarEmail) {
-
-                sidebarEmail.innerText =
-                    currentUser.email || "";
-            }
-
-
-            if (profileAvatar) {
-
-                let firstLetter = "U";
-
-
-                if (
-                    currentUser.firstName &&
-                    currentUser.firstName.length > 0
-                ) {
-
-                    firstLetter =
-                        currentUser.firstName
-                            .charAt(0)
-                            .toUpperCase();
-                }
-
-
-                profileAvatar.innerText =
-                    firstLetter;
-            }
-        }
-
-
-        // ==========================================
-        // EDIT MODE
-        // ==========================================
-
-        function setEditMode(editing) {
-
-            firstName.disabled =
-                !editing;
-
-            lastName.disabled =
-                !editing;
-
-            email.disabled =
-                !editing;
-
-            phone.disabled =
-                !editing;
-
-
-            if (saveProfileButton) {
-
-                saveProfileButton.disabled =
-                    !editing;
-            }
-
-
-            if (editProfileButton) {
-
-                if (editing) {
-
-                    editProfileButton.innerText =
-                        "CANCEL EDIT";
-
-                } else {
-
-                    editProfileButton.innerText =
-                        "EDIT PROFILE";
-                }
-            }
-        }
-
-
-        // ==========================================
-        // EDIT BUTTON
-        // ==========================================
-
-        let editing = false;
-
-
-        if (editProfileButton) {
-
-            editProfileButton.addEventListener(
-                "click",
-                function() {
-
-                    editing =
-                        !editing;
-
-
-                    if (editing) {
-
-                        setEditMode(true);
-
-                        clearMessage();
-
-                        firstName.focus();
-
-                    } else {
-
-                        /*
-                            Cancel kaloth
-                            old values aye load wenawa.
-                        */
-
-                        loadProfile();
-
-                        editing = false;
-
-                        clearMessage();
-                    }
-                }
+        if (error.message !== "Please log in again.") {
+            showMessage(
+                "Could not load account details. Please check the account API.",
+                "error"
             );
         }
 
-
-        // ==========================================
-        // SAVE PROFILE
-        // ==========================================
-
-        if (profileForm) {
-
-            profileForm.addEventListener(
-                "submit",
-                function(event) {
-
-                    event.preventDefault();
-
-
-                    if (!editing) {
-                        return;
-                    }
-
-
-                    const newFirstName =
-                        firstName.value.trim();
-
-                    const newLastName =
-                        lastName.value.trim();
-
-                    const newEmail =
-                        email.value
-                            .trim()
-                            .toLowerCase();
-
-                    const newPhone =
-                        phone.value.trim();
-
-
-                    // ==================================
-                    // EMPTY CHECK
-                    // ==================================
-
-                    if (
-                        newFirstName === "" ||
-                        newLastName === "" ||
-                        newEmail === "" ||
-                        newPhone === ""
-                    ) {
-
-                        showMessage(
-                            "Please fill in all fields.",
-                            "error"
-                        );
-
-                        return;
-                    }
-
-
-                    // ==================================
-                    // EMAIL CHECK
-                    // ==================================
-
-                    if (
-                        !newEmail.includes("@")
-                    ) {
-
-                        showMessage(
-                            "Please enter a valid email address.",
-                            "error"
-                        );
-
-                        return;
-                    }
-
-
-                    // ==================================
-                    // GET ALL USERS
-                    // ==================================
-
-                    let users =
-                        JSON.parse(
-                            localStorage.getItem(
-                                "ceylonTeaUsers"
-                            )
-                        ) || [];
-
-
-                    /*
-                        Original logged-in email.
-
-                        Me email eken users array eke
-                        correct user hoyanawa.
-                    */
-
-                    const oldEmail =
-                        currentUser.email
-                            .toLowerCase();
-
-
-                    // ==================================
-                    // DUPLICATE EMAIL CHECK
-                    // ==================================
-
-                    const duplicateEmail =
-                        users.find(
-                            function(user) {
-
-                                return (
-                                    user.email
-                                        .toLowerCase()
-                                    === newEmail
-                                    &&
-                                    user.email
-                                        .toLowerCase()
-                                    !== oldEmail
-                                );
-                            }
-                        );
-
-
-                    if (duplicateEmail) {
-
-                        showMessage(
-                            "Another account already uses this email.",
-                            "error"
-                        );
-
-                        return;
-                    }
-
-
-                    // ==================================
-                    // FIND USER
-                    // ==================================
-
-                    const userIndex =
-                        users.findIndex(
-                            function(user) {
-
-                                return (
-                                    user.email
-                                        .toLowerCase()
-                                    === oldEmail
-                                );
-                            }
-                        );
-
-
-                    if (userIndex === -1) {
-
-                        showMessage(
-                            "User account could not be found.",
-                            "error"
-                        );
-
-                        return;
-                    }
-
-
-                    // ==================================
-                    // UPDATE USER
-                    // ==================================
-
-                    users[userIndex].firstName =
-                        newFirstName;
-
-                    users[userIndex].lastName =
-                        newLastName;
-
-                    users[userIndex].email =
-                        newEmail;
-
-                    users[userIndex].phone =
-                        newPhone;
-
-
-                    // ==================================
-                    // SAVE USERS
-                    // ==================================
-
-                    localStorage.setItem(
-                        "ceylonTeaUsers",
-                        JSON.stringify(users)
-                    );
-
-
-                    // ==================================
-                    // UPDATE CURRENT USER
-                    // ==================================
-
-                    currentUser =
-                        users[userIndex];
-
-
-                    localStorage.setItem(
-                        "currentUser",
-                        JSON.stringify(
-                            currentUser
-                        )
-                    );
-
-
-                    localStorage.setItem(
-                        "loggedInUser",
-                        currentUser.email
-                    );
-
-
-                    // ==================================
-                    // UI UPDATE
-                    // ==================================
-
-                    updateProfileSummary();
-
-
-                    editing = false;
-
-                    setEditMode(false);
-
-
-                    showMessage(
-                        "Profile updated successfully!",
-                        "success"
-                    );
-                }
-            );
-        }
-
-
-        // ==========================================
-        // LOGOUT BUTTON
-        // ==========================================
-
-        if (logoutButton) {
-
-            logoutButton.addEventListener(
-                "click",
-                function() {
-
-                    if (logoutOverlay) {
-
-                        logoutOverlay.classList.add(
-                            "show"
-                        );
-                    }
-                }
-            );
-        }
-
-
-        // ==========================================
-        // CANCEL LOGOUT
-        // ==========================================
-
-        if (cancelLogout) {
-
-            cancelLogout.addEventListener(
-                "click",
-                function() {
-
-                    logoutOverlay.classList.remove(
-                        "show"
-                    );
-                }
-            );
-        }
-
-
-        // ==========================================
-        // CONFIRM LOGOUT
-        // ==========================================
-
-        if (confirmLogout) {
-
-            confirmLogout.addEventListener(
-                "click",
-                function() {
-
-                    logoutUser();
-                }
-            );
-        }
-
-
-        // ==========================================
-        // CLICK OUTSIDE MODAL
-        // ==========================================
-
-        if (logoutOverlay) {
-
-            logoutOverlay.addEventListener(
-                "click",
-                function(event) {
-
-                    if (
-                        event.target ===
-                        logoutOverlay
-                    ) {
-
-                        logoutOverlay.classList.remove(
-                            "show"
-                        );
-                    }
-                }
-            );
-        }
-
-
-        // ==========================================
-        // LOGOUT FUNCTION
-        // ==========================================
-
-        function logoutUser() {
-
-            /*
-                User account data
-                ceylonTeaUsers eken DELETE
-                karanne naha.
-
-                Login session/status
-                witharai clear karanne.
-            */
-
-            localStorage.removeItem(
-                "isLoggedIn"
-            );
-
-            localStorage.removeItem(
-                "loggedInUser"
-            );
-
-            localStorage.removeItem(
-                "currentUser"
-            );
-
-            localStorage.removeItem(
-                "redirectAfterLogin"
-            );
-
-
-            // Login page
-            window.location.replace(
-                "../auth/login.php"
-            );
-        }
-
-
-        // ==========================================
-        // MESSAGE
-        // ==========================================
-
-        function showMessage(
-            text,
-            type
-        ) {
-
-            if (!profileMessage) {
-                return;
-            }
-
-
-            profileMessage.innerText =
-                text;
-
-
-            profileMessage.className =
-                "profile-message " + type;
-        }
-
-
-        function clearMessage() {
-
-            if (!profileMessage) {
-                return;
-            }
-
-
-            profileMessage.innerText = "";
-
-            profileMessage.className =
-                "profile-message";
-        }
-
-
-        // ==========================================
-        // START
-        // ==========================================
-
-        loadProfile();
-
+        return;
     }
-);
+
+    if (editButton) {
+        editButton.addEventListener("click", function () {
+            if (editing) {
+                firstName.value = originalProfile.firstName;
+                lastName.value = originalProfile.lastName;
+                email.value = originalProfile.email;
+                phone.value = originalProfile.phone;
+
+                setEditMode(false);
+                clearMessage();
+            } else {
+                setEditMode(true);
+                clearMessage();
+                firstName.focus();
+            }
+        });
+    }
+
+    if (profileForm) {
+        profileForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            if (!editing) return;
+
+            const updatedUser = {
+                first_name: firstName.value.trim(),
+                last_name: lastName.value.trim(),
+                email: email.value.trim().toLowerCase(),
+                phone: phone.value.trim()
+            };
+
+            if (
+                !updatedUser.first_name ||
+                !updatedUser.last_name ||
+                !updatedUser.email ||
+                !updatedUser.phone
+            ) {
+                showMessage("Please fill in all fields.");
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updatedUser.email)) {
+                showMessage("Please enter a valid email address.");
+                return;
+            }
+
+            try {
+                const result = await apiRequest(ACCOUNT_API, {
+                    method: "POST",
+                    body: JSON.stringify(updatedUser)
+                });
+
+                const user = result.user || {};
+                const fullName =
+                    user.full_name ||
+                    (updatedUser.first_name + " " + updatedUser.last_name);
+
+                originalProfile = {
+                    firstName: updatedUser.first_name,
+                    lastName: updatedUser.last_name,
+                    email: updatedUser.email,
+                    phone: updatedUser.phone
+                };
+
+                updateSummary(fullName, updatedUser.email);
+                setEditMode(false);
+                showMessage("Profile updated successfully!", "success");
+
+            } catch (error) {
+                showMessage(error.message || "Could not update your profile.");
+            }
+        });
+    }
+
+    if (logoutButton && logoutOverlay) {
+        logoutButton.addEventListener("click", function () {
+            logoutOverlay.classList.add("show");
+        });
+    }
+
+    if (cancelLogout && logoutOverlay) {
+        cancelLogout.addEventListener("click", function () {
+            logoutOverlay.classList.remove("show");
+        });
+    }
+
+    if (logoutOverlay) {
+        logoutOverlay.addEventListener("click", function (event) {
+            if (event.target === logoutOverlay) {
+                logoutOverlay.classList.remove("show");
+            }
+        });
+    }
+
+    if (confirmLogout && logoutOverlay) {
+        confirmLogout.addEventListener("click", async function () {
+            confirmLogout.disabled = true;
+
+            try {
+                const response = await fetch(
+                    "/CEYLON-TEA-HOUSE/backend/api/logout.php",
+                    {
+                        method: "POST",
+                        credentials: "same-origin"
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Logout failed.");
+                }
+
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("loggedInUser");
+                localStorage.removeItem("currentUser");
+                localStorage.removeItem("redirectAfterLogin");
+
+                window.location.href = HOME_URL;
+
+            } catch (error) {
+                showMessage(error.message || "Logout failed.");
+                confirmLogout.disabled = false;
+            }
+        });
+    }
+});
